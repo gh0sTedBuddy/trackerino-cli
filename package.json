@@ -1,0 +1,26 @@
+{
+  "private": true,
+  "name": "TimeGenius",
+  "version": "1.0.0",
+  "description": "a small little script which starts a timer timer to enter your done tasks.",
+  "scripts": {
+    "start": "electron ."
+  },
+  "preferGlobal": "true",
+  "bin": {
+    "TimeGenius": "App.js"
+  },
+  "main": "App.js",
+  "license": "MIT",
+  "engines": {
+    "node": "*"
+  },
+  "dependencies": {
+    "moment": "^2.24.0",
+    "react-native-background-timer": "^2.3.1",
+    "yargs": "^15.3.1"
+  },
+  "devDependencies": {
+    "electron": "^8.2.5"
+  }
+}
