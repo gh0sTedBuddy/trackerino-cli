@@ -1,6 +1,4 @@
 function SyncCommand (_input, _instance) {
-	if(this.commands) {
-	}
 }
 
 module.exports = {
