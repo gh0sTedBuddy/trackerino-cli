@@ -54,6 +54,8 @@ class TimeGenius {
 			this.registerCommand(CommandList[_key])
 		}
 
+		this.registerBaseCommands ()
+
 		rl.on("close", this.onClose.bind(this))
 
 		this.data = {
@@ -74,6 +76,36 @@ class TimeGenius {
 		this.say(`⏰ Welcome to ${ this.name } v${ this.version }`)
 
 		this.ask()
+	}
+
+	registerBaseCommands () {
+		/*
+		* add command /idle to automatically calculate the current time spent for idle time (pauses, breaks, private time, etc.)
+		*/
+		this.registerCommand({
+			cmd: 'idle',
+			handle: _input => {
+				let inputDescription = _input.split(' ')
+				inputDescription.shift()
+				this.add(inputDescription.join(' '), true)
+				return this.ask()
+			}
+		})
+
+		/**
+		* add command /realtime to reset /set by setting the system back to real time
+		*/
+		this.registerCommand({
+			cmd: 'realtime',
+			handle: _input => {
+				if(!this.isRealTime) {
+					this.isRealTime = true
+					this.currentTime = moment()
+					console.log('set back to real time.')
+				}
+				return this.ask()
+			}
+		})
 	}
 
 	load () {
@@ -126,21 +158,6 @@ class TimeGenius {
 		if(_input.toLowerCase() == 'clear') {
 			console.clear()
 			return this.ask()
-		}
-
-		if(_input.toLowerCase().startsWith('/idle')) {
-			let inputDescription = _input.split(' ')
-			inputDescription.shift()
-			this.add(inputDescription.join(' '), true)
-			return this.ask()
-		}
-
-		if(_input.toLowerCase() == '/realtime') {
-			if(!this.isRealTime) {
-				this.isRealTime = true
-				this.currentTime = moment()
-				console.log('set back to real time.')
-			}
 		}
 
 		// check for commands
@@ -226,6 +243,12 @@ class TimeGenius {
 
 	logError(text) {
 		console.error(`\n⚠️\tERR: ${ text }`)
+	}
+
+	getAllFiles () {
+		// run through all files and return their tasks
+		let files = fs.readdirSync(this.data.path)
+		return files.filter(file => file.match(/(\d{4}\-\d{2}\-\d{2})\.json/i))
 	}
 }
 
