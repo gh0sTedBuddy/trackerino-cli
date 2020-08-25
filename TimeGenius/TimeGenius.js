@@ -1,31 +1,28 @@
-const fs = require('fs');
-const yargs = require('yargs').argv
-const readline = require('readline');
 const moment = require('moment')
 const CommandList = require('./Commands');
 
 const slugify = require('./Helpers/slugify')
 
-const __homedir = require('os').homedir();
-
-const rl = readline.createInterface({
-	input: process.stdin,
-	output: process.stdout
-})
-
-let lastActionAt = moment.unix()
 
 class TimeGenius {
 	constructor () {
 		let { version, name } = require('../package.json')
+
 		this.name = name
 		this.version = version
-		this.saveDelay = 10000
-
-		this._interval = setInterval(this.save.bind(this), this.saveDelay)
-
-		this.dateFormat = 'YYYY-MM-DD'
-		this.timeFormat = 'HH:mm'
+		this.options = {
+			...{
+				storage: null,
+				date: null,
+				dateFormat: 'YYYY-MM-DD',
+				timeFormat: 'HH:mm',
+				onAsk: () => {},
+				onClose: () => {},
+				onOutput: () => {},
+				onError: () => {}
+			},
+			...(arguments[0] || {})
+		}
 
 		this.commands = {}
 		this.init()
@@ -34,21 +31,6 @@ class TimeGenius {
 	init () {
 		this.isRealTime = true
 		this.currentTime = moment()
-		if(yargs.today) {
-			try {
-				this.currentTime = moment(yargs.today).startOf()
-				this.isRealTime = false
-			}
-			catch (err) {
-				console.log(err)
-				process.exit(1)
-			}
-		}
-
-		if(yargs.version || yargs.v) {
-			console.log(this.version)
-			process.exit(0)
-		}
 
 		for(let _key in CommandList) {
 			this.registerCommand(CommandList[_key])
@@ -56,26 +38,15 @@ class TimeGenius {
 
 		this.registerBaseCommands ()
 
-		rl.on("close", this.onClose.bind(this))
-
-		this.data = {
-			filename: `${ this.currentTime.format(this.dateFormat) }.json`,
-			previous_filename: `${ this.currentTime.clone().subtract(1, 'd').format(this.dateFormat) }.json`,
-			path: __homedir + '/.TimeGenius',
-			started_at: this.currentTime.unix(),
-			project: null,
-			totalAmount: 0.0,
-			tasks: []
-		}
-
-		this.projectsList = []
-		this.todos = []
-
 		this.load()
 
 		this.say(`⏰ Welcome to ${ this.name } v${ this.version }`)
 
 		this.ask()
+	}
+
+	storage () {
+		return this.options.storage
 	}
 
 	registerBaseCommands () {
@@ -85,9 +56,7 @@ class TimeGenius {
 		this.registerCommand({
 			cmd: 'idle',
 			handle: _input => {
-				let inputDescription = _input.split(' ')
-				inputDescription.shift()
-				this.add(inputDescription.join(' '), true)
+				this.add(_input, true)
 				return this.ask()
 			}
 		})
@@ -101,7 +70,7 @@ class TimeGenius {
 				if(!this.isRealTime) {
 					this.isRealTime = true
 					this.currentTime = moment()
-					console.log('set back to real time.')
+					this.say('set back to real time.')
 				}
 				return this.ask()
 			}
@@ -109,40 +78,22 @@ class TimeGenius {
 	}
 
 	load () {
-		// load tasks file
-		if(fs.existsSync(`${ this.data.path }/${ this.data.filename }`)) {
-			this.data = require(`${ this.data.path }/${ this.data.filename }`)
-			if(!this.data.tasks) {
-				this.data.tasks = []
-			}
-			console.log(`💾 loaded existing file ${ this.data.filename }\n`)
-		}
-
-		// load projects
-		if(!fs.existsSync(`${ this.data.path }/projects.json`)) {
-			fs.writeFileSync(`${ this.data.path }/projects.json`, JSON.stringify(this.projectsList, null, 2))
-		} else {
-			this.projectsList = require(`${ this.data.path }/projects.json`)
-		}
-
-		// load todos
-		if(!fs.existsSync(`${ this.data.path }/todos.json`)) {
-			fs.writeFileSync(`${ this.data.path }/todos.json`, JSON.stringify(this.todos, null, 2))
-		} else {
-			this.todos = require(`${ this.data.path }/todos.json`)
+		if(!!this.options.storage) {
+			this.options.storage.load()
 		}
 	}
 
 	say (text) {
-		console.log(text)
+		let cmd = arguments[1] || null
+		this.options.onOutput(text, cmd)
 	}
 
 	ask () {
 		let question = [`\n⏱  What have you done?`]
-		if(this.data.project) {
-			question.push(`[\x1b[36m${ this.data.project }\x1b[0m]`)
+		if(!!this.options.storage.get('project')) {
+			question.push(`[\x1b[36m${ this.options.storage.get('project') }\x1b[0m]`)
 		}
-		rl.question(question.join(' ') + ' ', this.getAnswer.bind(this))
+		this.options.onAsk(question.join(' ') + ' ', this.getAnswer.bind(this))
 	}
 
 	getAnswer (_input) {
@@ -180,8 +131,9 @@ class TimeGenius {
 	}
 
 	getLastTaskEndTime (defaultValue = null) {
-		if(this.data.tasks.length > 0) {
-			return this.data.tasks[this.data.tasks.length-1].ended_at || defaultValue || this.data.started_at
+		let tasks = this.options.storage.get('tasks')
+		if(tasks.length > 0) {
+			return tasks[tasks.length-1].ended_at || this.options.storage.get('started_at', defaultValue)
 		}
 		return defaultValue
 	}
@@ -196,29 +148,25 @@ class TimeGenius {
 	save () {
 		const callback = arguments[0] || null
 
-		fs.writeFileSync(`${ this.data.path }/${ this.data.filename }`, JSON.stringify(this.data, null, 2))
-		fs.writeFileSync(`${ this.data.path }/todos.json`, JSON.stringify(this.todos, null, 2))
-		fs.writeFileSync(`${ this.data.path }/projects.json`, JSON.stringify(this.projectsList, null, 2))
-
-		if(callback != null) {
-			callback()
+		if(!!this.options.storage) {
+			this.options.storage.save(callback)
 		}
 	}
 
 	add (task) {
 		let isIdle = arguments[1] || false
-		let started_at = this.getLastTaskEndTime(this.data.started_at)
+		let started_at = this.getLastTaskEndTime(this.options.storage.get('started_at', moment().unix()))
 		let ended_at = this.isRealTime ? moment().unix() : this.currentTime.unix()
 		let amount = parseFloat(((ended_at - started_at) / 60 / 60).toFixed(2))
 
-		if(!this.data.totalAmount) this.data.totalAmount = 0
+		if(!this.options.storage.get('totalAmount')) this.options.storage.set('totalAmount', 0)
 
-		this.data.totalAmount += amount
+		this.options.storage.increase('totalAmount', amount)
 
-		if(!this.data.tasks) this.data.tasks = []
+		let tasks = this.options.storage.get('tasks', [])
 
-		this.data.tasks.push({
-			project: !!isIdle ? null : this.data.project,
+		tasks.push({
+			project: !!isIdle ? null : this.options.storage.get('project'),
 			task: task,
 			started_at: started_at,
 			ended_at: ended_at,
@@ -226,29 +174,25 @@ class TimeGenius {
 			amount: amount
 		})
 
+		this.options.storage.set('tasks', tasks)
+
 		if(isIdle) {
 			this.say(`😴 pssst... you're ${ task || 'sleeping (?!)' } for ${ amount } hours (or ${ (amount * 60).toFixed(2) } minutes). 💤`)
-			process.stderr.write("\x07")
+			if(!!process && !!process.stderr) process.stderr.write("\x07")
 		} else {
 			this.say(`✅ awesome! that only took you ${ amount } hours (or ${ (amount * 60).toFixed(2) } minutes). 👍`)
 		}
 	}
 
 	onClose () {
-		console.log("\n👋 BYE 😊\n")
 		this.save(() => {
+			this.say("\n👋 BYE 😊\n")
 			process.exit(0)
 		})
 	}
 
 	logError(text) {
-		console.error(`\n⚠️\tERR: ${ text }`)
-	}
-
-	getAllFiles () {
-		// run through all files and return their tasks
-		let files = fs.readdirSync(this.data.path)
-		return files.filter(file => file.match(/(\d{4}\-\d{2}\-\d{2})\.json/i))
+		this.onError(text)
 	}
 }
 
