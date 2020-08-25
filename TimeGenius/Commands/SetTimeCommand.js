@@ -8,9 +8,9 @@ function SetTimeCommand (_input, _instance) {
 		this.currentTime.hours(hours)
 		this.currentTime.minutes(minutes)
 		this.isRealTime = false
-		this.say(`set current time: ${ this.currentTime.format(this.timeFormat) }`)
+		this.say(`set current time: ${ this.currentTime.format(this.options.timeFormat) }`)
 	} else {
-		this.say(`wrong time format, kept time at current time: ${ currentTime.format(this.timeFormat) }`)
+		this.say(`wrong time format, kept time at current time: ${ this.currentTime.format(this.options.timeFormat) }`)
 	}
 }
 

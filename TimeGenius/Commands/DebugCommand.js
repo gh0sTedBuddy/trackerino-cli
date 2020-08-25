@@ -1,5 +1,5 @@
-function DebugCommand (_input, _instance) {
-	console.log(this.data)
+function DebugCommand (_input) {
+	console.log(this.options.storage.get('data'))
 }
 
 module.exports = {

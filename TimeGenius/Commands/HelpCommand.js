@@ -1,4 +1,4 @@
-function HelpCommand (_input, _instance) {
+function HelpCommand (_input) {
 	if(this.commands) {
 		for(let _key in this.commands) {
 			let command = this.commands[_key]

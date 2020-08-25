@@ -1,15 +1,18 @@
 const moment = require('moment')
 
-function NowCommand (_input, _instance) {
+function NowCommand (_input) {
+	let started_at = this.options.storage.get('started_at')
+	let tasks = this.options.storage.get('tasks', [])
+
 	this.say([
-		`You started at: ${ moment.unix(this.data.started_at).format(this.timeFormat) }`,
-		`and now is: ${ this.currentTime.format(this.timeFormat) }.`
+		`You started at: ${ moment.unix(started_at).format(this.options.timeFormat) }`,
+		`and now is: ${ this.currentTime.format(this.options.timeFormat) }.`
 	].join(' '))
 
-	if(!!this.data.tasks && this.data.tasks.length > 0) {
-		let lastEntry = this.data.tasks[this.data.tasks.length - 1]
+	if(!!tasks && tasks.length > 0) {
+		let lastEntry = tasks[tasks.length - 1]
 		if(lastEntry && lastEntry.ended_at) {
-			this.say(`You ended your last task at: ${ moment.unix(lastEntry.ended_at).format(this.timeFormat) } (${ (this.isRealTime ? moment() : currentTime).diff(moment.unix(lastEntry.ended_at), 'minutes') } minutes ago).`)
+			this.say(`You ended your last task at: ${ moment.unix(lastEntry.ended_at).format(this.options.timeFormat) } (${ (this.isRealTime ? moment() : this.currentTime).diff(moment.unix(lastEntry.ended_at), 'minutes') } minutes ago).`)
 		}
 	}
 }

@@ -1,23 +1,27 @@
 const moment = require('moment')
 
-function ProjectCommand (_input, _instance) {
+function ProjectCommand (_input) {
+	let project = this.options.storage.get('project', null)
+	let projects = this.options.storage.get('projects', [])
 	if(_input) {
 		console.log(`set project to ${ _input }`)
-		let proj = this.projectsList.filter(project => {
+		let proj = projects.filter(project => {
 			return project.name.toLowerCase() === _input.toLowerCase()
 		})
-		if(proj.length > 0) {
+
+		if(!!proj && proj.length > 0) {
 			proj = proj.shift()
-			this.data.project = proj.name
+			this.options.storage.set('project', proj.name)
 		} else {
-			this.projectsList.push({
+			projects.push({
 				name: _input,
 				amount: 0.0
 			})
-			this.data.project = _input
+			this.options.storage.set('projects', projects)
+			this.options.storage.set('project', _input)
 		}
 	} else {
-		this.data.project = null
+		this.options.storage.set('project', null)
 	}
 }
 

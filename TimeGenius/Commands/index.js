@@ -1,16 +1,34 @@
-const fs = require('fs')
-const path = require('path')
-const basename = path.basename(__filename);
-let commandList = {}
-
-var files = fs
-	.readdirSync(__dirname)
-	.filter((file) => {
-		return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js');
-	})
-	.forEach((file) => {
-		var cmd_name = file.split('.')[0];
-		commandList[cmd_name] = require('./'+file);
-	});
-
-module.exports = commandList
+const DebugCmd = require('./DebugCommand')
+const DeleteCmd = require('./DeleteCommand')
+const DoneCmd = require('./DoneCommand')
+const ExportCmd = require('./ExportCommand')
+const HelpCmd = require('./HelpCommand')
+const NowCmd = require('./NowCommand')
+const ProjectCmd = require('./ProjectCommand')
+const ProjectsCmd = require('./ProjectsCommand')
+const SetStartCmd = require('./SetStartCommand')
+const SetTimeCmd = require('./SetTimeCommand')
+const SyncCmd = require('./SyncCommand')
+const TasksCmd = require('./TasksCommand')
+const TodayCmd = require('./TodayCommand')
+const TodoCmd = require('./TodoCommand')
+const TodosCmd = require('./TodosCommand')
+const UpdateCmd = require('./UpdateCommand')
+module.exports = {
+	DebugCmd,
+	DeleteCmd,
+	DoneCmd,
+	ExportCmd,
+	HelpCmd,
+	NowCmd,
+	ProjectCmd,
+	ProjectsCmd,
+	SetStartCmd,
+	SetTimeCmd,
+	SyncCmd,
+	TasksCmd,
+	TodayCmd,
+	TodoCmd,
+	TodosCmd,
+	UpdateCmd
+}

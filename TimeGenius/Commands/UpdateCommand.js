@@ -1,11 +1,12 @@
 function UpdateCommand (_input, _instance) {
+	let tasks = this.options.storage.get('tasks', [])
 	try {
 		let inputParts = _input.split(' ')
 		let updateIndex = parseInt(inputParts.shift())
 		let correction = parseFloat(inputParts.shift() || 0)
 		let description = inputParts.join(' ')
-		if(updateIndex >= 0 && updateIndex < this.data.tasks.length) {
-			let task = this.data.tasks[updateIndex]
+		if(updateIndex >= 0 && updateIndex < tasks.length) {
+			let task = tasks[updateIndex]
 
 			if(correction !== 0) {
 				task.amount += correction
@@ -16,7 +17,8 @@ function UpdateCommand (_input, _instance) {
 				task.task = description
 			}
 
-			this.data.tasks[updateIndex] = task
+			tasks[updateIndex] = task
+			this.options.storage.set('tasks', tasks)
 			this.say(`updated task #${ updateIndex } with ${ correction } hours`, !!description ? `and new description: ${ '\x1b[2m' }${ description }${ '\x1b[0m' }` : '')
 			this.getAnswer('/tasks')
 		} else {

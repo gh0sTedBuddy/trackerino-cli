@@ -1,14 +1,16 @@
 function TodoCommand (_input, _instance) {
-	this.say(`➕ add todo: ${ _input } with index ${ this.todos.length }`)
+	let project = this.options.storage.get('project', null)
+	let todos = this.options.storage.get('todos', [])
+	this.say(`➕ add todo: ${ _input } with index ${ todos.length }`)
 
-	if(!this.todos) this.todos = []
-
-	this.todos.push({
-		project: this.data.project,
+	todos.push({
+		project: project,
 		task: _input
 	})
 
-	this.say(`- to finish this task, you just need to enter /done ${ this.todos.length - 1 }`)
+	this.options.storage.set('todos', todos)
+
+	this.say(`- to finish this task, you just need to enter /done ${ todos.length - 1 }`)
 }
 
 module.exports = {
