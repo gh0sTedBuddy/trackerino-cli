@@ -1,16 +1,15 @@
 const moment = require('moment')
+const shortid = require('shortid')
 function ProjectsCommand (_input) {
 	let projects = this.options.storage.get('projects', [])
 	if(!!projects && projects.length) {
 		if(!!_input) {
 			let tasks = []
 			let files = this.options.storage.getAll()
-			/** NEED TO FIX/REPLACE THIS WITH STORAGE HANDLING
-			//
+
 			for(let _index = 0; _index < files.length; _index++) {
 				try {
-					let content = fs.readFileSync(`${ this.options.storage.getPath() }/${ files[_index] }`)
-					content = JSON.parse(content)
+					let content = files[_index]
 					if(!!content && !!content.tasks && content.tasks.length > 0) {
 						let dayTasks = content.tasks.filter(task => !!task && !!task.project && task.project.toLowerCase() === _input.toLowerCase())
 						tasks = [...tasks, ...dayTasks]
@@ -23,14 +22,14 @@ function ProjectsCommand (_input) {
 					this.logError(err)
 				}
 			}
-			// */
 
 			if(tasks.length > 0) {
+
 				let projects = this.options.storage.get('projects')
 				let _amount = tasks.reduce((v,t) => v + t.amount, 0.0)
 
 				projects = projects.map(proj => {
-					if(proj.name.toLowerCase() === _input.toLowerCase()) {
+					if(proj.get('name').toLowerCase() === _input.toLowerCase()) {
 						proj.amount = _amount
 					}
 
@@ -45,22 +44,24 @@ function ProjectsCommand (_input) {
 		} else {
 			let currentProject = this.options.storage.get('project', null)
 			if(!!projects && projects.length > 0) {
-				projects.map(project => {
-					if(!project || !project.name) return
+				projects.map((project, _index) => {
+					if(!project || !project.get('name')) return
+
 					let output = []
-					if(!!currentProject && project.name.toLowerCase() === currentProject.toLowerCase()) {
+					if(!!currentProject && project.get('name').toLowerCase() === currentProject.toLowerCase()) {
 						output.push(['[\x1b[36m', 'X', '\x1b[0m]'].join(''))
 					} else {
 						output.push('[ ]')
 					}
 
-					output.push(`${ '\x1b[32m' }${ project.amount.toFixed(2) }${ '\x1b[0m' }`)
-					output.push(project.name)
+					output.push(`${ '\x1b[32m' }${ project.get('amount').toFixed(2) }${ '\x1b[0m' }`)
+					output.push(project.get('name'))
 
 					this.say(output.join("\t"))
 				})
 			}
 		}
+
 	} else {
 		this.logError(`no projects yet`)
 		this.say(`add projects by /project [PROJECTNAME]`)

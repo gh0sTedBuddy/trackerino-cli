@@ -9,12 +9,12 @@ function UpdateCommand (_input, _instance) {
 			let task = tasks[updateIndex]
 
 			if(correction !== 0) {
-				task.amount += correction
-				task.ended_at += correction * 60 * 60
+				task.set('amount', task.get('amount')  + correction)
+				task.set('ended_at', task.get('ended_at')  + (correction * 60 * 60))
 			}
 
 			if(description) {
-				task.task = description
+				task.set('task', description)
 			}
 
 			tasks[updateIndex] = task

@@ -1,30 +1,46 @@
 const fs = require('fs')
 const moment = require('moment')
+const Models = require('./Models')
 
 const __homedir = require('os').homedir();
 
 class Storage {
 	constructor () {
-		this.filename = moment().format('YYYY-MM-DD')
 		this.options = {
+			date: null,
 			path: `${ __homedir }/.TimeGenius`,
 			...(arguments[0] || {})
 		}
 
+		if(!!this.options.date) {
+			this.filename = this.options.date.format('YYYY-MM-DD')
+		} else {
+			this.filename = moment().format('YYYY-MM-DD')
+		}
+
 		this.data = {
 			data: {
-				started_at: moment().unix(),
+				started_at: this.options.date ? this.options.date.unix() : moment().unix(),
 				project: null,
 				totalAmount: 0.0,
 				tasks: []
 			},
+			lists: [],
 			projects: [],
 			todos: []
 		}
 	}
 
+	setDate (date) {
+		this.setFilename(date.format('YYYY-MM-DD'))
+		if(moment(this.get('started_at')).format('YYYY-MM-DD') != date.format('YYYY-MM-DD')) {
+			this.data.started_at = date.unix()
+		}
+	}
+
 	setFilename (name) {
 		this.filename = name
+		this.load()
 	}
 
 	getPath () {
@@ -32,8 +48,22 @@ class Storage {
 	}
 
 	getAll () {
+		let all = []
 		let files = fs.readdirSync(this.options.path)
-		return files.filter(fname => fname.match(/\d{4}\-\d{2}\-\d{2}\.json/i))
+		files.filter(fname => fname.match(/\d{4}\-\d{2}\-\d{2}\.json/i)).map((fName, _index) => {
+			let key = fName.split('.').shift()
+			try {
+				let content = fs.readFileSync(`${ this.getPath() }/${ fName }`)
+				content = JSON.parse(content)
+				if(!!content && !!content.tasks && content.tasks.length > 0) {
+					all.push(content)
+				}
+			} catch(err) {
+				console.log(err)
+			}
+		})
+
+		return all
 	}
 
 	load () {
@@ -52,6 +82,36 @@ class Storage {
 						key = keys[_index]
 					}
 					this.data[key] = JSON.parse(content)
+					switch(key) {
+						case 'data':
+							if(!!this.data[key].tasks && this.data[key].tasks.length > 0) {
+								this.data[key].tasks = this.data[key].tasks.map(data => {
+									return new Models.Task(data)
+								})
+							}
+							break
+						case 'projects':
+							if(!!this.data[key] && this.data[key].length > 0) {
+								this.data[key] = this.data[key].map(data => {
+									return new Models.Project(data)
+								})
+							}
+							break
+						case 'lists':
+							if(!!this.data[key] && this.data[key].length > 0) {
+								this.data[key] = this.data[key].map(data => {
+									return new Models.List(data)
+								})
+							}
+							break
+						case 'todos':
+							if(!!this.data[key] && this.data[key].length > 0) {
+								this.data[key] = this.data[key].map(data => {
+									return new Models.Todo(data)
+								})
+							}
+							break
+					}
 				} catch(err) {
 					console.log('ERR', err)
 					process.exit(1)
@@ -70,7 +130,25 @@ class Storage {
 
 			if('data' === key) {
 				key = this.filename
-				data = this.data.data
+				data = {...this.data.data}
+
+				if(!!data.tasks && data.tasks.length > 0) {
+					data.tasks = data.tasks.map(task => {
+						if(!!task.getData && typeof task.getData == 'function') {
+							return task.getData()
+						} else {
+							return task
+						}
+					})
+				}
+			} else {
+				data = data.map(entry => {
+					if(!!entry.getData && typeof entry.getData == 'function') {
+						return entry.getData()
+					} else {
+						return entry
+					}
+				})
 			}
 
 			fs.writeFileSync(
@@ -100,6 +178,8 @@ class Storage {
 			this.data[key] = value
 		} else if(!this.data[key] && (!!this.data.data[key] || this.data.data[key] === null) && 'data' !== key) {
 			this.data.data[key] = value
+		} else {
+			console.error(`key: ${ key } not found in storage`)
 		}
 	}
 

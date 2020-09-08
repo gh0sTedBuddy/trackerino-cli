@@ -21,11 +21,11 @@ function ExportCommand (_input) {
 
 		tasks.map(task => csvData.push([
 			this.currentTime.format(this.options.dateFormat),
-			moment.unix(task.started_at).format(this.options.timeFormat),
-			moment.unix(task.ended_at).format(this.options.timeFormat),
-			task.amount,
-			task.project,
-			task.task
+			moment.unix(task.get('started_at')).format(this.options.timeFormat),
+			moment.unix(task.get('ended_at')).format(this.options.timeFormat),
+			task.get('amount'),
+			task.get('project'),
+			task.get('task')
 		]))
 
 		this.say(csvData.map(entry => {

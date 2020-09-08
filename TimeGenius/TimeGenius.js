@@ -1,8 +1,10 @@
 const moment = require('moment')
-const CommandList = require('./Commands');
+const CommandList = require('./Commands')
+const shortid = require('shortid')
+
+const Models = require('./Models')
 
 const slugify = require('./Helpers/slugify')
-
 
 class TimeGenius {
 	constructor () {
@@ -12,6 +14,7 @@ class TimeGenius {
 		this.version = version
 		this.options = {
 			...{
+				i18n: null,
 				storage: null,
 				date: null,
 				dateFormat: 'YYYY-MM-DD',
@@ -29,8 +32,8 @@ class TimeGenius {
 	}
 
 	init () {
-		this.isRealTime = true
-		this.currentTime = moment()
+		this.isRealTime = !this.options.date
+		this.currentTime = this.options.date || moment()
 
 		for(let _key in CommandList) {
 			this.registerCommand(CommandList[_key])
@@ -40,13 +43,20 @@ class TimeGenius {
 
 		this.load()
 
-		this.say(`⏰ Welcome to ${ this.name } v${ this.version }`)
+		this.say(this.__(`⏰ Welcome to ${ this.name }`))
 
 		this.ask()
 	}
 
 	storage () {
 		return this.options.storage
+	}
+
+	__ (key) {
+		if(!!this.options.i18n) {
+			return this.options.i18n.__(key)
+		}
+		return key
 	}
 
 	registerBaseCommands () {
@@ -89,7 +99,7 @@ class TimeGenius {
 	}
 
 	ask () {
-		let question = [`\n⏱  What have you done?`]
+		let question = [this.__(`⏱  What have you done?`)]
 		if(!!this.options.storage.get('project')) {
 			question.push(`[\x1b[36m${ this.options.storage.get('project') }\x1b[0m]`)
 		}
@@ -121,6 +131,52 @@ class TimeGenius {
 		}
 
 		if(_input.startsWith('/')) {
+			let [full, _id, _action, _value] = _input.match(/^\/([\w\-\_]+)\.?(\w+)?\s?(.+)?/i)
+
+			let entities = ['tasks', 'todos', 'lists']
+			while(entities.length > 0) {
+				let entity = entities.shift()
+				let objects = this.storage().get(entity)
+				if(!!objects && objects.length > 0) {
+					let result = objects.filter(obj => {
+						if(!obj || !obj.get) {
+							return false
+						}
+						return !!obj.get('id') && obj.get('id') === _id
+					})
+
+
+					if(!!result && result.length > 0) {
+						result = result.shift()
+						if(!!_action) {
+							if('object' === typeof result) {
+								if('function' === typeof result[_action]) {
+									let output = result[_action](_value)
+
+									if(!!output && 'string' === typeof output) {
+										this.say(output)
+									}
+								} else {
+									this.logError(`no action/property ${ _action } on ${ _id } found`)
+								}
+							}
+							return this.ask()
+						} else {
+							// list object information
+							this.say(`available properties/actions for ${ _id }:`)
+							let props = Object.getOwnPropertyNames(result)
+							for (let _key = 0; _key < props.length; _key++) {
+								let propName = props[_key]
+								if('function' === typeof result[propName]) {
+									this.say(`- ${ propName }`)
+								}
+							}
+							return this.ask()
+						}
+						break
+					}
+				}
+			}
 			this.logError(`command not found ${ _input }`)
 			return this.ask()
 		}
@@ -133,15 +189,20 @@ class TimeGenius {
 	getLastTaskEndTime (defaultValue = null) {
 		let tasks = this.options.storage.get('tasks')
 		if(tasks.length > 0) {
-			return tasks[tasks.length-1].ended_at || this.options.storage.get('started_at', defaultValue)
+			return tasks[tasks.length-1].get('ended_at') || this.options.storage.get('started_at', defaultValue)
 		}
 		return defaultValue
 	}
 
 	registerCommand (command) {
-		this.commands[command.cmd] = {
-			...command,
-			...{ handle: command.handle.bind(this) }
+		try {
+			this.commands[command.cmd] = {
+				...command,
+				...{ handle: command.handle.bind(this) }
+			}
+		} catch(err) {
+			console.log(command)
+			console.log(err)
 		}
 	}
 
@@ -165,14 +226,14 @@ class TimeGenius {
 
 		let tasks = this.options.storage.get('tasks', [])
 
-		tasks.push({
+		tasks.push(new Models.Task({
 			project: !!isIdle ? null : this.options.storage.get('project'),
 			task: task,
 			started_at: started_at,
 			ended_at: ended_at,
 			is_idle: !!isIdle,
 			amount: amount
-		})
+		}))
 
 		this.options.storage.set('tasks', tasks)
 
@@ -192,7 +253,7 @@ class TimeGenius {
 	}
 
 	logError(text) {
-		this.onError(text)
+		this.options.onError(text)
 	}
 }
 

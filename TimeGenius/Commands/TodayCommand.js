@@ -5,25 +5,26 @@ function TodayCommand (_input, _instance) {
 	let totalTime = 0
 	let idleTime = 0
 	let currentProject = this.options.storage.get('project', null)
+	this.say(this.currentTime.format(this.options.dateFormat))
 	tasks.map((task, index) => {
 		if(!task) return
 		let output = [
-			`[${ totalTime.toFixed(2) } ${ !!task.is_idle ? '\x1b[47m' : '\x1b[32m' } +${ (task.amount).toFixed(2) } ${ '\x1b[0m' }]`
+			`[${ totalTime.toFixed(2) } ${ !!task.get('is_idle') ? '\x1b[47m' : '\x1b[32m' } +${ (task.get('amount') || 0.0).toFixed(2) } ${ '\x1b[0m' }]`
 		]
 
-		if(task.project) {
-			output.push(`[\x1b[36m${ task.project }\x1b[0m]`)
+		if(task.get('project')) {
+			output.push(`[\x1b[36m${ task.get('project') }\x1b[0m]`)
 		} else {
 			output.push('[--]')
 		}
 
-		output.push(`${ moment.unix(task.started_at).format(this.options.timeFormat) }-${ moment.unix(task.ended_at).format(this.options.timeFormat) }`)
-		output.push(task.task)
+		output.push(`${ moment.unix(task.get('started_at')).format(this.options.timeFormat) }-${ moment.unix(task.get('ended_at')).format(this.options.timeFormat) }`)
+		output.push(task.get('task'))
 
-		if(!!task.is_idle) {
-			idleTime += task.amount
+		if(!!task.get('is_idle')) {
+			idleTime += task.get('amount')
 		}
-		totalTime += task.amount
+		totalTime += task.get('amount')
 
 		this.say(output.join("\t"))
 	})

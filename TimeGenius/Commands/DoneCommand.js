@@ -6,8 +6,8 @@ function DoneCommand (_input, _instance) {
 		if(doneIndex >= 0) {
 			if(doneIndex <= todos.length - 1) {
 				let oldProject = currentProject
-				currentProject = todos[doneIndex].project || null
-				this.add(todos[doneIndex].task)
+				currentProject = todos[doneIndex].get('project') || null
+				this.add(todos[doneIndex].get('task'))
 				currentProject = oldProject
 				this.options.storage.set('todos', todos.filter((todo, index) => index !== doneIndex))
 			} else {

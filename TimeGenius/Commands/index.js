@@ -14,21 +14,22 @@ const TodayCmd = require('./TodayCommand')
 const TodoCmd = require('./TodoCommand')
 const TodosCmd = require('./TodosCommand')
 const UpdateCmd = require('./UpdateCommand')
+const ListsCmd = require('./ListsCommand')
+const ListCmd = require('./ListCommand')
 module.exports = {
 	DebugCmd,
 	DeleteCmd,
-	DoneCmd,
-	ExportCmd,
-	HelpCmd,
 	NowCmd,
-	ProjectCmd,
-	ProjectsCmd,
 	SetStartCmd,
 	SetTimeCmd,
 	SyncCmd,
+	ExportCmd,
+	HelpCmd,
+
+	ProjectCmd, ProjectsCmd,
 	TasksCmd,
+	UpdateCmd,
 	TodayCmd,
-	TodoCmd,
-	TodosCmd,
-	UpdateCmd
+	TodoCmd, TodosCmd, DoneCmd,
+	ListsCmd, ListCmd
 }

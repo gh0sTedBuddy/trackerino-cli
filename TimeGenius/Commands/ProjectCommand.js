@@ -1,4 +1,5 @@
 const moment = require('moment')
+const Models = require('../Models')
 
 function ProjectCommand (_input) {
 	let project = this.options.storage.get('project', null)
@@ -6,17 +7,16 @@ function ProjectCommand (_input) {
 	if(_input) {
 		console.log(`set project to ${ _input }`)
 		let proj = projects.filter(project => {
-			return project.name.toLowerCase() === _input.toLowerCase()
+			return project.get('name').toLowerCase() === _input.toLowerCase()
 		})
 
 		if(!!proj && proj.length > 0) {
 			proj = proj.shift()
-			this.options.storage.set('project', proj.name)
+			this.options.storage.set('project', proj.get('name'))
 		} else {
-			projects.push({
-				name: _input,
-				amount: 0.0
-			})
+			projects.push(new Models.Project({
+				name: _input
+			}))
 			this.options.storage.set('projects', projects)
 			this.options.storage.set('project', _input)
 		}

@@ -11,8 +11,8 @@ function NowCommand (_input) {
 
 	if(!!tasks && tasks.length > 0) {
 		let lastEntry = tasks[tasks.length - 1]
-		if(lastEntry && lastEntry.ended_at) {
-			this.say(`You ended your last task at: ${ moment.unix(lastEntry.ended_at).format(this.options.timeFormat) } (${ (this.isRealTime ? moment() : this.currentTime).diff(moment.unix(lastEntry.ended_at), 'minutes') } minutes ago).`)
+		if(lastEntry && lastEntry.get('ended_at')) {
+			this.say(`You ended your last task at: ${ moment.unix(lastEntry.get('ended_at')).format(this.options.timeFormat) } (${ (this.currentTime).diff(moment.unix(lastEntry.get('ended_at')), 'minutes') } minutes ago).`)
 		}
 	}
 }
