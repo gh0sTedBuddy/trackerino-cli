@@ -16,6 +16,7 @@ function ExportCommand (_input) {
 			"END",
 			"AMOUNT",
 			"PROJECT",
+			"CATEGORY",
 			"TASK",
 		])
 
@@ -23,7 +24,8 @@ function ExportCommand (_input) {
 			this.currentTime.format(this.options.dateFormat),
 			moment.unix(task.get('started_at')).format(this.options.timeFormat),
 			moment.unix(task.get('ended_at')).format(this.options.timeFormat),
-			task.get('amount'),
+			task.get('amount').toFixed(2).split('.').join(','),
+			'',
 			task.get('project'),
 			task.get('task')
 		]))

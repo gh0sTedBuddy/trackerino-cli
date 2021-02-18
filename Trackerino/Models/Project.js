@@ -10,6 +10,7 @@ class Project extends BaseModel {
 		this.data = {
 			...this.data,
 			name: '',
+			company: null,
 			slug: null,
 			amount: 0.0,
 			...(arguments[0] || {})
@@ -17,6 +18,21 @@ class Project extends BaseModel {
 
 		if(!!this.data.name) {
 			this.data.slug = slugify(this.data.name)
+		}
+	}
+
+	select (_value, _interface) {
+		console.log(_interface)
+	}
+
+	export (_value, _interface) {
+		let files = _interface.storage.getAll()
+		console.log(files.length)
+	}
+
+	company(_value, _interface) {
+		if(!!_value) {
+			this.data.company = _value
 		}
 	}
 }

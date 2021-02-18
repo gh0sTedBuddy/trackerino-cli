@@ -6,7 +6,7 @@ const Models = require('./Models')
 
 const slugify = require('./Helpers/slugify')
 
-class TimeGenius {
+class Trackerino {
 	constructor () {
 		let { version, name } = require('../package.json')
 
@@ -133,7 +133,7 @@ class TimeGenius {
 		if(_input.startsWith('/')) {
 			let [full, _id, _action, _value] = _input.match(/^\/([\w\-\_]+)\.?(\w+)?\s?(.+)?/i)
 
-			let entities = ['tasks', 'todos', 'lists']
+			let entities = ['tasks', 'todos', 'lists', 'projects', 'trackers']
 			while(entities.length > 0) {
 				let entity = entities.shift()
 				let objects = this.storage().get(entity)
@@ -150,14 +150,34 @@ class TimeGenius {
 						result = result.shift()
 						if(!!_action) {
 							if('object' === typeof result) {
-								if('function' === typeof result[_action]) {
-									let output = result[_action](_value)
+								if('delete' === _action) {
+									if(_value != _id) {
+										this.say(`if you want to delete ${ entity } with id ${ _id } please confirm your deletion request by adding the id to your command: /[id].delete [id]`)
+									} else {
+										objects = objects.filter(obj => {
+											if(!obj || !obj.get) {
+												return false
+											}
+											return !!obj.get('id') && obj.get('id') !== _id
+										})
+										this.storage().set(entity, objects)
+
+										this.say(`${ entity } with id ${ _id } deleted`)
+									}
+									return this.ask()
+								} else if('function' === typeof result[_action]) {
+									let output = result[_action](_value, this)
 
 									if(!!output && 'string' === typeof output) {
 										this.say(output)
 									}
 								} else {
-									this.logError(`no action/property ${ _action } on ${ _id } found`)
+									let property = result.get(_action)
+									if('string' === typeof property) {
+										result.set(_action, _value)
+									} else {
+										this.logError(`no action/property ${ _action } on ${ _id } found`)
+									}
 								}
 							}
 							return this.ask()
@@ -257,4 +277,4 @@ class TimeGenius {
 	}
 }
 
-module.exports = TimeGenius
+module.exports = Trackerino

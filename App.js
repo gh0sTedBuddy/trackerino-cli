@@ -4,15 +4,15 @@ const path = require('path');
 const i18n = require('i18n');
 i18n.configure({
 	locales: ['de','en'],
-	directory: path.join(__dirname, 'TimeGenius', 'locales')
+	directory: path.join(__dirname, 'Trackerino', 'locales')
 })
 const locale = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG || process.env.LANGUAGE
 i18n.setLocale((locale).split('_').shift().toLowerCase())
 const readline = require('readline');
 const moment = require('moment');
 
-const Storage = require('./TimeGenius/Storage')
-const TimeGenius = require('./TimeGenius');
+const Storage = require('./Trackerino/Storage')
+const Trackerino = require('./Trackerino');
 
 const rl = readline.createInterface({
 	input: process.stdin,
@@ -40,7 +40,7 @@ const $storage = new Storage({
 	date: today
 })
 
-const timeGenius = new TimeGenius({
+const trackerino = new Trackerino({
 	storage: $storage,
 	date: today,
 	onAsk: (q, handle) => rl.question(q, handle),
@@ -50,9 +50,9 @@ const timeGenius = new TimeGenius({
 	}
 })
 
-let _AppInterval = setInterval(timeGenius.save.bind(timeGenius), 10000)
+let _AppInterval = setInterval(trackerino.save.bind(trackerino), 10000)
 
 rl.on("close", () => {
 	clearInterval(_AppInterval)
-	timeGenius.onClose()
+	trackerino.onClose()
 })

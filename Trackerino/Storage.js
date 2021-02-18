@@ -8,7 +8,7 @@ class Storage {
 	constructor () {
 		this.options = {
 			date: null,
-			path: `${ __homedir }/.TimeGenius`,
+			path: `${ __homedir }/.Trackerino`,
 			...(arguments[0] || {})
 		}
 
@@ -16,6 +16,10 @@ class Storage {
 			this.filename = this.options.date.format('YYYY-MM-DD')
 		} else {
 			this.filename = moment().format('YYYY-MM-DD')
+		}
+
+		if(!fs.existsSync(this.options.path)) {
+			fs.mkdirSync(this.options.path);
 		}
 
 		this.data = {
@@ -26,6 +30,7 @@ class Storage {
 				tasks: []
 			},
 			lists: [],
+			trackers: [],
 			projects: [],
 			todos: []
 		}
@@ -101,6 +106,13 @@ class Storage {
 							if(!!this.data[key] && this.data[key].length > 0) {
 								this.data[key] = this.data[key].map(data => {
 									return new Models.List(data)
+								})
+							}
+							break
+						case 'trackers':
+							if(!!this.data[key] && this.data[key].length > 0) {
+								this.data[key] = this.data[key].map(data => {
+									return new Models.Tracker(data)
 								})
 							}
 							break

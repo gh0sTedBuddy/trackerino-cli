@@ -1,14 +1,13 @@
-const shortid = require('shortid')
+const Models = require('../Models')
 function TodoCommand (_input, _instance) {
 	let project = this.options.storage.get('project', null)
 	let todos = this.options.storage.get('todos', [])
 	this.say(`➕ add todo: ${ _input } with index ${ todos.length }`)
 
-	todos.push({
-		id: shortid.generate(),
+	todos.push(new Models.Todo({
 		project: project,
 		task: _input
-	})
+	}))
 
 	this.options.storage.set('todos', todos)
 

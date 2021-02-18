@@ -47,7 +47,7 @@ function ProjectsCommand (_input) {
 				projects.map((project, _index) => {
 					if(!project || !project.get('name')) return
 
-					let output = []
+					let output = [project.get('id')]
 					if(!!currentProject && project.get('name').toLowerCase() === currentProject.toLowerCase()) {
 						output.push(['[\x1b[36m', 'X', '\x1b[0m]'].join(''))
 					} else {

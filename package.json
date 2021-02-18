@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "TimeGenius",
+  "name": "trackerino",
   "version": "1.0.0",
   "description": "a small little script which starts a timer timer to enter your done tasks.",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "preferGlobal": "true",
   "bin": {
-    "TimeGenius": "App.js"
+    "trackerino": "App.js"
   },
   "main": "App.js",
   "license": "MIT",

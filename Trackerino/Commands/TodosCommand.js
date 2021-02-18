@@ -5,7 +5,7 @@ function TodosCommand (_input, _instance) {
 		let output = []
 		for(let index = 0; index < todos.length; index++) {
 			let entry = todos[index]
-			if(!!entry && (!currentProject || (currentProject != null && currentProject == entry.get('project')))) {
+			if(!!entry && entry.get && (!currentProject || (currentProject != null && currentProject == entry.get('project')))) {
 				output.push(`☑️  [${ index }] ${ (entry.get('project') ? `[${ entry.get('project') }] ` : '') }${ entry.get('task') }`)
 			}
 		}
