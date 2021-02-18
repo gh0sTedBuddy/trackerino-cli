@@ -6,7 +6,7 @@ i18n.configure({
 	locales: ['de','en'],
 	directory: path.join(__dirname, 'Trackerino', 'locales')
 })
-const locale = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG || process.env.LANGUAGE
+const locale = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG || process.env.LANGUAGE || 'en'
 i18n.setLocale((locale).split('_').shift().toLowerCase())
 const readline = require('readline');
 const moment = require('moment');
