@@ -16,11 +16,21 @@ class BaseModel {
 		return this.data
 	}
 
-	get (key) {
+	get (key, _default = null) {
+		if(typeof this.data[key] === undefined) {
+			return  _default
+		}
 		return this.data[key]
 	}
 
 	set (key, value) {
+		try {
+			let intValue = parseInt(value)
+
+			value = intValue
+		} catch (err) {
+
+		}
 		this.data[key] = value
 		this.data.updated_at = moment().unix()
 	}

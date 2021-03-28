@@ -1,4 +1,5 @@
 const DebugCmd = require('./DebugCommand')
+const ConfigCmd = require('./ConfigCommand')
 const DeleteCmd = require('./DeleteCommand')
 const DoneCmd = require('./DoneCommand')
 const ExportCmd = require('./ExportCommand')
@@ -20,6 +21,7 @@ const TrackerCmd = require('./TrackerCommand')
 const TrackersCmd = require('./TrackersCommand')
 module.exports = {
 	DebugCmd,
+	ConfigCmd,
 	DeleteCmd,
 	NowCmd,
 	SetStartCmd,

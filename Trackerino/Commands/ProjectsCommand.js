@@ -29,7 +29,8 @@ function ProjectsCommand (_input) {
 				let _amount = tasks.reduce((v,t) => v + t.amount, 0.0)
 
 				projects = projects.map(proj => {
-					if(proj.get('name').toLowerCase() === _input.toLowerCase()) {
+					if(proj.get('name').toLowerCase() == _input.toLowerCase()) {
+						proj.set('amount', _amount)
 						proj.amount = _amount
 					}
 

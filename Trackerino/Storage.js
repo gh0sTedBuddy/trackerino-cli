@@ -32,7 +32,13 @@ class Storage {
 			lists: [],
 			trackers: [],
 			projects: [],
-			todos: []
+			todos: [],
+			config: {
+				redmine_api_base: null,
+				redmine_api_key: null,
+				mite_api_base: null,
+				mite_api_key: null
+			}
 		}
 	}
 
@@ -140,27 +146,33 @@ class Storage {
 			let key = keys[_index]
 			let data = this.data[key] || null
 
-			if('data' === key) {
-				key = this.filename
-				data = {...this.data.data}
+			switch(key) {
+				case 'data':
+					key = this.filename
+					data = {...this.data.data}
 
-				if(!!data.tasks && data.tasks.length > 0) {
-					data.tasks = data.tasks.map(task => {
-						if(!!task.getData && typeof task.getData == 'function') {
-							return task.getData()
+					if(!!data.tasks && data.tasks.length > 0) {
+						data.tasks = data.tasks.map(task => {
+							if(!!task.getData && typeof task.getData == 'function') {
+								return task.getData()
+							} else {
+								return task
+							}
+						})
+					}
+					break
+				case 'config':
+					// save config data as it is
+					break
+				default:
+					data = data.map(entry => {
+						if(!!entry.getData && typeof entry.getData == 'function') {
+							return entry.getData()
 						} else {
-							return task
+							return entry
 						}
 					})
-				}
-			} else {
-				data = data.map(entry => {
-					if(!!entry.getData && typeof entry.getData == 'function') {
-						return entry.getData()
-					} else {
-						return entry
-					}
-				})
+					break
 			}
 
 			fs.writeFileSync(

@@ -173,7 +173,8 @@ class Trackerino {
 									}
 								} else {
 									let property = result.get(_action)
-									if('string' === typeof property) {
+									console.log(property)
+									if('undefined' !== typeof property) {
 										result.set(_action, _value)
 									} else {
 										this.logError(`no action/property ${ _action } on ${ _id } found`)
@@ -184,7 +185,7 @@ class Trackerino {
 						} else {
 							// list object information
 							this.say(`available properties/actions for ${ _id }:`)
-							let props = Object.getOwnPropertyNames(result)
+							let props = Object.keys(result.getData())
 							for (let _key = 0; _key < props.length; _key++) {
 								let propName = props[_key]
 								if('function' === typeof result[propName]) {
