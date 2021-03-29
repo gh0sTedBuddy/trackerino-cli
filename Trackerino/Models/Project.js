@@ -1,3 +1,4 @@
+const axios = require('axios')
 const moment = require('moment')
 const BaseModel = require('./BaseModel')
 
@@ -56,7 +57,7 @@ class Project extends BaseModel {
 		}).join("\n")
 	}
 
-	export (_value, _interface) {
+	async export (_value, _interface) {
 		const files = _interface.options.storage.getAll()
 		let tasks = []
 		files.forEach(file => {
@@ -75,9 +76,30 @@ class Project extends BaseModel {
 			case 'json':
 				break
 			case 'redmine':
-				if(!this.get('redmine_api_endpoint') && !this.get('redmine_api_key')) {
+				const endpoint_uri = this.get('redmine_api_endpoint')
+				const endpoint_key = this.get('redmine_api_key')
+				if(!endpoint_uri || !endpoint_key) {
 					_interface.say(`api endpoint or key is missing:\n\t/${this.get('id')}.redmine_api_endpoint [YOUR ENDPOINT]\n\t/${this.get('id')}.redmine_api_key [YOUR KEY]\n`)
+					return
 				}
+
+				// try to send post requests for each task to redmine
+				for(let _index = 0; _index < tasks.length; _index++) {
+					const task = tasks[_index]
+					if(!task.is_idle) {
+						await axios.post(endpoint_uri, {
+							key: endpoint_key,
+							time_entry: {
+								spent_on: moment.unix(task.started_at).format(_interface.options.dateFormat),
+								issue_id: 7938,
+								project_id: 116,
+								hours: task.amount,
+								comments: task.task
+							}
+						})
+					}
+				}
+
 				break
 		}
 	}

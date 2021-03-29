@@ -16,6 +16,7 @@
     "node": "*"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "i18n": "^0.13.2",
     "moment": "^2.24.0",
     "shortid": "^2.2.15",

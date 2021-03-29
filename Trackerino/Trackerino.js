@@ -189,7 +189,7 @@ class Trackerino {
 							for (let _key = 0; _key < props.length; _key++) {
 								let propName = props[_key]
 								if('function' === typeof result[propName]) {
-									this.say(`- ${ propName }`)
+									this.say(`- ${ propName } = ${result.get(propName)}`)
 								}
 							}
 							return this.ask()
