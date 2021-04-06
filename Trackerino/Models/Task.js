@@ -1,4 +1,5 @@
 const moment = require('moment')
+const ProjectModel = require('./Project')
 const BaseModel = require('./BaseModel')
 
 class Task extends BaseModel {
@@ -15,6 +16,26 @@ class Task extends BaseModel {
 		}
 
 		this.initMethods()
+	}
+
+	project (_value, _interface) {
+		const projects = _interface.options.storage.get('projects', [])
+		if(!!_value) {
+			console.log(`set project of ${ this.get('id') } to ${ _value }`)
+			let proj = projects.filter(project => {
+				return project.get('name').toLowerCase() === _value.toLowerCase()
+			})
+
+			if(!!proj && proj.length > 0) {
+				proj = proj.shift()
+			} else {
+				projects.push(new ProjectModel({
+					name: _value
+				}))
+				_interface.options.storage.set('projects', projects)
+			}
+			this.data.project = _value
+		}
 	}
 }
 
