@@ -12,8 +12,12 @@ function NowCommand (_input) {
 	if(!!tasks && tasks.length > 0) {
 		let workTime = tasks.filter(task => !task.get('is_idle')).map(task => task.get('amount')).reduce((a,c) => a+c)
 		if(workTime > 0) {
-			let timeLeft = (this.options.storage.get('config.daily_work_time') || 0) - workTime
-			this.say(`Total work today: ${workTime.toFixed(2)} (${timeLeft > 0 ? timeLeft : 0})`)
+			let dailyWorkTime = (this.options.storage.get('config').daily_work_time || 0)
+			let timeLeft =  dailyWorkTime - workTime
+			if(timeLeft > 0) {
+				timeLeft = `${ timeLeft.toFixed(2) } hours left (${ (timeLeft * 60).toFixed(2) } mins)`
+			}
+			this.say(`Total work today: ${workTime.toFixed(2)}/${dailyWorkTime.toFixed(2)} hours, ${timeLeft}`)
 		}
 		let lastEntry = tasks[tasks.length - 1]
 		if(lastEntry && lastEntry.get('ended_at')) {

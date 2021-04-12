@@ -34,11 +34,7 @@ class Storage {
 			projects: [],
 			todos: [],
 			config: {
-				daily_work_time: 8,
-				redmine_api_base: null,
-				redmine_api_key: null,
-				mite_api_base: null,
-				mite_api_key: null
+				daily_work_time: 8
 			}
 		}
 	}
@@ -103,7 +99,10 @@ class Storage {
 							}
 							break
 						case 'config':
-							console.log(this.data[key])
+							this.data[key] = {
+								daily_work_time: 8,
+								...this.data[key]
+							}
 							break
 						case 'projects':
 							if(!!this.data[key] && this.data[key].length > 0) {
