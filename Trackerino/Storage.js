@@ -34,6 +34,7 @@ class Storage {
 			projects: [],
 			todos: [],
 			config: {
+				daily_work_time: 8,
 				redmine_api_base: null,
 				redmine_api_key: null,
 				mite_api_base: null,
@@ -101,6 +102,9 @@ class Storage {
 								})
 							}
 							break
+						case 'config':
+							console.log(this.data[key])
+							break
 						case 'projects':
 							if(!!this.data[key] && this.data[key].length > 0) {
 								this.data[key] = this.data[key].map(data => {
@@ -162,7 +166,11 @@ class Storage {
 					}
 					break
 				case 'config':
-					// save config data as it is
+					try {
+						data.daily_work_time = parseInt(data.daily_work_time)
+					} catch(err) {
+						console.log(err)
+					}
 					break
 				default:
 					data = data.map(entry => {
