@@ -26,12 +26,14 @@ class Storage {
 			data: {
 				started_at: this.options.date ? this.options.date.unix() : moment().unix(),
 				project: null,
+				category: null,
 				totalAmount: 0.0,
 				tasks: []
 			},
 			lists: [],
 			trackers: [],
 			projects: [],
+			categories: [],
 			todos: [],
 			config: {
 				daily_work_time: 8
@@ -89,7 +91,20 @@ class Storage {
 					if('data' === keys[_index]) {
 						key = keys[_index]
 					}
-					this.data[key] = JSON.parse(content)
+
+					if(Array.isArray(this.data[key])) {
+						this.data[key] = [
+							...this.data[key],
+							...(JSON.parse(content) || [])
+						]
+					} else if('object' === typeof this.data[key]) {
+						this.data[key] = {
+							...this.data[key],
+							...(JSON.parse(content) || [])
+						}
+					} else {
+						this.data[key] = JSON.parse(content)
+					}
 					switch(key) {
 						case 'data':
 							if(!!this.data[key].tasks && this.data[key].tasks.length > 0) {
@@ -108,6 +123,13 @@ class Storage {
 							if(!!this.data[key] && this.data[key].length > 0) {
 								this.data[key] = this.data[key].map(data => {
 									return new Models.Project(data)
+								})
+							}
+							break
+						case 'categories':
+							if(!!this.data[key] && this.data[key].length > 0) {
+								this.data[key] = this.data[key].map(data => {
+									return new Models.Category(data)
 								})
 							}
 							break

@@ -7,6 +7,8 @@ const HelpCmd = require('./HelpCommand')
 const NowCmd = require('./NowCommand')
 const ProjectCmd = require('./ProjectCommand')
 const ProjectsCmd = require('./ProjectsCommand')
+const CategoryCmd = require('./CategoryCommand')
+const CategoriesCmd = require('./CategoriesCommand')
 const SetStartCmd = require('./SetStartCommand')
 const SetTimeCmd = require('./SetTimeCommand')
 const SyncCmd = require('./SyncCommand')
@@ -31,6 +33,8 @@ module.exports = {
 	HelpCmd,
 
 	ProjectCmd, ProjectsCmd,
+	CategoryCmd, CategoriesCmd,
+
 	TasksCmd,
 	UpdateCmd,
 	TodayCmd,

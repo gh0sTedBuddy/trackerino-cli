@@ -1,5 +1,6 @@
 const moment = require('moment')
 const ProjectModel = require('./Project')
+const CategoryModel = require('./Category')
 const BaseModel = require('./BaseModel')
 
 class Task extends BaseModel {
@@ -9,6 +10,8 @@ class Task extends BaseModel {
 		this.data = {
 			...this.data,
 			task: '',
+			project: null,
+			category: null,
 			started_at: moment().unix(),
 			ended_at: null,
 			is_idle: false,
@@ -35,6 +38,26 @@ class Task extends BaseModel {
 				_interface.options.storage.set('projects', projects)
 			}
 			this.data.project = _value
+		}
+	}
+
+	category (_value, _interface) {
+		const categories = _interface.options.storage.get('categories', [])
+		if(!!_value) {
+			console.log(`set category of ${ this.get('id') } to ${ _value }`)
+			let proj = categories.filter(category => {
+				return category.get('name').toLowerCase() === _value.toLowerCase()
+			})
+
+			if(!!proj && proj.length > 0) {
+				proj = proj.shift()
+			} else {
+				categories.push(new CategoryModel({
+					name: _value
+				}))
+				_interface.options.storage.set('categories', categories)
+			}
+			this.data.category = _value
 		}
 	}
 }

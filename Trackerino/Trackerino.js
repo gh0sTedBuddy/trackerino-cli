@@ -100,8 +100,10 @@ class Trackerino {
 
 	ask () {
 		let question = [this.__(`⏱  What have you done?`)]
-		if(!!this.options.storage.get('project')) {
-			question.push(`[\x1b[36m${ this.options.storage.get('project') }\x1b[0m]`)
+		let project = this.options.storage.get('project', null)
+		let category = this.options.storage.get('category', null)
+		if(!!project || !!category) {
+			question.push(`[\x1b[36m${ [project,category].filter(e => !!e).join(`\x1b[0m / \x1b[32m`) }\x1b[0m]`)
 		}
 		this.options.onAsk(question.join(' ') + ' ', this.getAnswer.bind(this))
 	}
@@ -133,7 +135,7 @@ class Trackerino {
 		if(_input.startsWith('/')) {
 			let [full, _id, _action, _value] = _input.match(/^\/([\w\-\_]+)\.?(\w+)?\s?(.+)?/i)
 
-			let entities = ['tasks', 'todos', 'lists', 'projects', 'trackers']
+			let entities = ['tasks', 'todos', 'lists', 'projects', 'categories', 'trackers']
 			while(entities.length > 0) {
 				let entity = entities.shift()
 				let objects = this.storage().get(entity)
@@ -249,6 +251,7 @@ class Trackerino {
 
 		tasks.push(new Models.Task({
 			project: !!isIdle ? null : this.options.storage.get('project'),
+			category: !!isIdle ? null : this.options.storage.get('category'),
 			task: task,
 			started_at: started_at,
 			ended_at: ended_at,

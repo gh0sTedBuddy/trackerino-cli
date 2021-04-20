@@ -24,15 +24,16 @@ class BaseModel {
 	}
 
 	set (key, value) {
-		try {
-			let intValue = parseInt(value)
-
-			value = intValue
-		} catch (err) {
-
-		}
 		this.data[key] = value
 		this.data.updated_at = moment().unix()
+	}
+
+	setInt(key, value) {
+		try {
+			let intValue = parseInt(value)
+			this.set(key, intValue)
+		} catch (err) {
+		}
 	}
 
 	initMethods () {

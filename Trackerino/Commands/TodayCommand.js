@@ -15,7 +15,13 @@ function TodayCommand (_input, _instance) {
 		if(task.get('project')) {
 			output.push(`[\x1b[36m${ task.get('project') }\x1b[0m]`)
 		} else {
-			output.push('[--]')
+			output.push('[\x1b[36m--\x1b[0m]')
+		}
+
+		if(task.get('category')) {
+			output.push(`[\x1b[42m${ task.get('category') }\x1b[0m]`)
+		} else {
+			output.push('[\x1b[13m--\x1b[0m]')
 		}
 
 		output.push(`${ moment.unix(task.get('started_at')).format(this.options.timeFormat) }-${ moment.unix(task.get('ended_at')).format(this.options.timeFormat) }`)
