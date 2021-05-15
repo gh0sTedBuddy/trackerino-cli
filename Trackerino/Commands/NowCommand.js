@@ -1,4 +1,4 @@
-const moment = require('moment')
+const {format, differenceInMinutes} = require('date-fns')
 
 function NowCommand (_input) {
 	let started_at = this.options.storage.get('started_at')
@@ -6,8 +6,8 @@ function NowCommand (_input) {
 	const categories = this.options.storage.get('categories', [])
 
 	this.say([
-		`You started at: ${ moment.unix(started_at).format(this.options.timeFormat) }`,
-		`and now is: ${ this.currentTime.format(this.options.timeFormat) }.`
+		`You started at: ${ format(started_at, this.options.timeFormat) }`,
+		`and now is: ${ format(this.currentTime, this.options.timeFormat) }.`
 	].join(' '))
 
 	let dailyWorkTime = (this.options.storage.get('config').daily_work_time || 0)
@@ -24,7 +24,7 @@ function NowCommand (_input) {
 		}
 
 		if(lastEntry && lastEntry.get('ended_at')) {
-			this.say(`You ended your last task at: ${ moment.unix(lastEntry.get('ended_at')).format(this.options.timeFormat) } (${ (this.currentTime).diff(moment.unix(lastEntry.get('ended_at')), 'minutes') } minutes ago).`)
+			this.say(`You ended your last task at: ${ format(lastEntry.get('ended_at'), this.options.timeFormat) } (${ differenceInMinutes(this.currentTime, lastEntry.get('ended_at')) } minutes ago).`)
 		}
 	}
 }

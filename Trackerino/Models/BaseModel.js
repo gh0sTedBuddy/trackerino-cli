@@ -1,12 +1,11 @@
 const shortid = require('shortid')
-const moment = require('moment')
 
 class BaseModel {
 	constructor () {
 		this.data = {
 			id: shortid.generate(),
-			created_at: moment().unix(),
-			updated_at: moment().unix(),
+			created_at: Date.now(),
+			updated_at: Date.now(),
 			deleted_at: null,
 			of_type: this.constructor.name
 		}
@@ -25,7 +24,7 @@ class BaseModel {
 
 	set (key, value) {
 		this.data[key] = value
-		this.data.updated_at = moment().unix()
+		this.data.updated_at = Date.now()
 	}
 
 	setInt(key, value) {
@@ -56,7 +55,7 @@ class BaseModel {
 			}
 
 			this['delete'] = () => {
-				this.data.deleted_at = moment().unix()
+				this.data.deleted_at = Date.now()
 			}
 		}
 	}

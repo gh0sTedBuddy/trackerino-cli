@@ -1,4 +1,3 @@
-const moment = require('moment')
 const CommandList = require('./Commands')
 const shortid = require('shortid')
 
@@ -17,7 +16,7 @@ class Trackerino {
 				i18n: null,
 				storage: null,
 				date: null,
-				dateFormat: 'YYYY-MM-DD',
+				dateFormat: 'yyyy-MM-dd',
 				timeFormat: 'HH:mm',
 				onAsk: () => {},
 				onClose: () => {},
@@ -33,7 +32,7 @@ class Trackerino {
 
 	init () {
 		this.isRealTime = !this.options.date
-		this.currentTime = this.options.date || moment()
+		this.currentTime = this.options.date || Date.now()
 
 		for(let _key in CommandList) {
 			this.registerCommand(CommandList[_key])
@@ -79,7 +78,7 @@ class Trackerino {
 			handle: _input => {
 				if(!this.isRealTime) {
 					this.isRealTime = true
-					this.currentTime = moment()
+					this.currentTime = Date.now()
 					this.say('set back to real time.')
 				}
 				return this.ask()
@@ -239,9 +238,9 @@ class Trackerino {
 
 	add (task) {
 		let isIdle = arguments[1] || false
-		let started_at = this.getLastTaskEndTime(this.options.storage.get('started_at', moment().unix()))
-		let ended_at = this.isRealTime ? moment().unix() : this.currentTime.unix()
-		let amount = parseFloat(((ended_at - started_at) / 60 / 60).toFixed(2))
+		let started_at = this.getLastTaskEndTime(this.options.storage.get('started_at', Date.now()))
+		let ended_at = this.isRealTime ? Date.now() : this.currentTime
+		let amount = parseFloat(((ended_at - started_at) / 1000 / 60 / 60).toFixed(2))
 
 		if(!this.options.storage.get('totalAmount')) this.options.storage.set('totalAmount', 0)
 

@@ -1,4 +1,3 @@
-const moment = require('moment')
 const Models = require('../Models')
 
 function ConfigCommand (_input) {

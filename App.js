@@ -9,7 +9,6 @@ i18n.configure({
 const locale = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG || process.env.LANGUAGE || 'en'
 i18n.setLocale((locale).split('_').shift().toLowerCase())
 const readline = require('readline');
-const moment = require('moment');
 
 const Storage = require('./Trackerino/Storage')
 const Trackerino = require('./Trackerino');
@@ -22,7 +21,7 @@ const rl = readline.createInterface({
 let today = null
 if(yargs.today) {
 	try {
-		today = moment(yargs.today).startOf()
+		today = new Date(Date.parse(yargs.today))
 	}
 	catch (err) {
 		console.log(err)

@@ -1,5 +1,5 @@
 const fs = require('fs')
-const moment = require('moment')
+const { format } = require('date-fns')
 const Models = require('./Models')
 
 const __homedir = require('os').homedir();
@@ -12,11 +12,11 @@ class Storage {
 			...(arguments[0] || {})
 		}
 
-		if(!!this.options.date) {
-			this.filename = this.options.date.format('YYYY-MM-DD')
-		} else {
-			this.filename = moment().format('YYYY-MM-DD')
+		if(!this.options.date) {
+			this.options.date = new Date()
 		}
+
+		this.filename = format(this.options.date, 'yyyy-MM-dd')
 
 		if(!fs.existsSync(this.options.path)) {
 			fs.mkdirSync(this.options.path);
@@ -24,7 +24,7 @@ class Storage {
 
 		this.data = {
 			data: {
-				started_at: this.options.date ? this.options.date.unix() : moment().unix(),
+				started_at: this.options.date.getTime(),
 				project: null,
 				category: null,
 				totalAmount: 0.0,
@@ -42,8 +42,8 @@ class Storage {
 	}
 
 	setDate (date) {
-		this.setFilename(date.format('YYYY-MM-DD'))
-		if(moment(this.get('started_at')).format('YYYY-MM-DD') != date.format('YYYY-MM-DD')) {
+		this.setFilename(format(date, 'yyyy-MM-dd'))
+		if(format(this.get('started_at'), 'yyyy-MM-dd') != format(date, 'yyyy-MM-dd')) {
 			this.data.started_at = date.unix()
 		}
 	}

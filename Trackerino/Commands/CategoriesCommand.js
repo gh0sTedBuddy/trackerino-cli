@@ -1,5 +1,5 @@
-const moment = require('moment')
 const shortid = require('shortid')
+const {format} = require('date-fns')
 function CategoriesCommand (_input) {
 	let categories = this.options.storage.get('categories', [])
 	if(!!categories && categories.length) {
@@ -15,7 +15,7 @@ function CategoriesCommand (_input) {
 						tasks = [...tasks, ...dayTasks]
 						let dayAmount = dayTasks.reduce((v,t) => v+t.amount, 0)
 						if(dayAmount > 0) {
-							this.say(`${ moment.unix(content.started_at).format(this.options.dateFormat) } (${ dayTasks.length }): ${ dayAmount.toFixed(2) } hours`)
+							this.say(`${ format(content.started_at, this.options.dateFormat) } (${ dayTasks.length }): ${ dayAmount.toFixed(2) } hours`)
 						}
 					}
 				} catch(err) {

@@ -1,8 +1,9 @@
 const axios = require('axios')
-const moment = require('moment')
 const BaseModel = require('./BaseModel')
 
 const slugify = require('../Helpers/slugify')
+
+const {format} = require('date-fns')
 
 class Project extends BaseModel {
 	constructor () {
@@ -12,6 +13,8 @@ class Project extends BaseModel {
 			...this.data,
 			redmine_api_endpoint: null,
 			redmine_api_key: null,
+			mite_api_endpoint: null,
+			mite_api_key: null,
 			name: '',
 			company: null,
 			slug: null,
@@ -42,9 +45,9 @@ class Project extends BaseModel {
 		])
 
 		tasks.map(task => csvData.push([
-			moment.unix(task.started_at).format(_interface.options.dateFormat),
-			moment.unix(task.started_at).format(_interface.options.timeFormat),
-			moment.unix(task.ended_at).format(_interface.options.timeFormat),
+			format(task.started_at, _interface.options.dateFormat),
+			format(task.started_at, _interface.options.timeFormat),
+			format(task.ended_at, _interface.options.timeFormat),
 			task.amount.toFixed(2).split('.').join(','),
 			this.get('company'),
 			task.project,
@@ -67,7 +70,11 @@ class Project extends BaseModel {
 				}).forEach(task => tasks.push(task))
 			}
 		})
-		switch(_value.toLowerCase()) {
+
+		if(!!_value && 'string' === typeof _value) {
+			_value = _value.toLowerCase()
+		}
+		switch(_value) {
 			default:
 				_interface.say('unknown format, default: csv')
 			case 'csv':
@@ -75,10 +82,45 @@ class Project extends BaseModel {
 				break
 			case 'json':
 				break
+			case 'mite':
+				const mite_api_endpoint = this.get('mite_api_endpoint')
+				const mite_api_key = this.get('mite_api_key')
+				if(!mite_api_endpoint || !mite_api_key) {
+					_interface.say(`api endpoint or key is missing:\n\t/${this.get('id')}.mite_api_endpoint [YOUR ENDPOINT]\n\t/${this.get('id')}.mite_api_key [YOUR KEY]\n`)
+					return
+				}
+
+				const projects = await axios.get(`${ mite_api_endpoint }/projects.json?api_key=${ mite_api_key }`)
+				const services = await axios.get(`${ mite_api_endpoint }/services.json?api_key=${ mite_api_key }`)
+
+				for(let _index = 0; _index < tasks.length; _index++) {
+					const task = tasks[_index]
+					if(!task.is_idle) {
+						let project = projects.data.find(entry => entry.project.name.toLowerCase() == task.project.toLowerCase())
+						let service = services.data.find(entry => entry.service.name.toLowerCase() == task.category.toLowerCase())
+						if(project) {
+							project = project.project
+						}
+						if(service) {
+							service = service.service
+						}
+						await axios.post(`${ mite_api_endpoint }/time_entries.json`, {
+							api_key: mite_api_key,
+							time_entry: {
+								date_at: format(task.started_at, _interface.options.dateFormat),
+								minutes: task.amount * 60,
+								note: task.task,
+								project_id: project.id || null,
+								service_id: service.id || null
+							}
+						})
+					}
+				}
+				break
 			case 'redmine':
-				const endpoint_uri = this.get('redmine_api_endpoint')
-				const endpoint_key = this.get('redmine_api_key')
-				if(!endpoint_uri || !endpoint_key) {
+				const redmine_api_endpoint = this.get('redmine_api_endpoint')
+				const redmine_api_key = this.get('redmine_api_key')
+				if(!redmine_api_endpoint || !redmine_api_key) {
 					_interface.say(`api endpoint or key is missing:\n\t/${this.get('id')}.redmine_api_endpoint [YOUR ENDPOINT]\n\t/${this.get('id')}.redmine_api_key [YOUR KEY]\n`)
 					return
 				}
@@ -87,10 +129,10 @@ class Project extends BaseModel {
 				for(let _index = 0; _index < tasks.length; _index++) {
 					const task = tasks[_index]
 					if(!task.is_idle) {
-						await axios.post(endpoint_uri, {
-							key: endpoint_key,
+						await axios.post(redmine_api_endpoint, {
+							key: redmine_api_key,
 							time_entry: {
-								spent_on: moment.unix(task.started_at).format(_interface.options.dateFormat),
+								spent_on: format(task.started_at, _interface.options.dateFormat),
 								issue_id: 7938,
 								project_id: 116,
 								hours: task.amount,
@@ -113,6 +155,18 @@ class Project extends BaseModel {
 	redmine_api_key (_value, _interface) {
 		if(!!_value) {
 			this.data.redmine_api_key = _value
+		}
+	}
+
+	mite_api_endpoint (_value, _interface) {
+		if(!!_value) {
+			this.data.mite_api_endpoint = _value
+		}
+	}
+
+	mite_api_key (_value, _interface) {
+		if(!!_value) {
+			this.data.mite_api_key = _value
 		}
 	}
 

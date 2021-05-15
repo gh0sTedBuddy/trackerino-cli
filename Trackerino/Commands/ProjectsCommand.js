@@ -1,4 +1,4 @@
-const moment = require('moment')
+const {format} = require('date-fns')
 const shortid = require('shortid')
 function ProjectsCommand (_input) {
 	let projects = this.options.storage.get('projects', [])
@@ -15,7 +15,7 @@ function ProjectsCommand (_input) {
 						tasks = [...tasks, ...dayTasks]
 						let dayAmount = dayTasks.reduce((v,t) => v+t.amount, 0)
 						if(dayAmount > 0) {
-							this.say(`${ moment.unix(content.started_at).format(this.options.dateFormat) } (${ dayTasks.length }): ${ dayAmount.toFixed(2) } hours`)
+							this.say(`${ format(content.started_at, this.options.dateFormat) } (${ dayTasks.length }): ${ dayAmount.toFixed(2) } hours`)
 						}
 					}
 				} catch(err) {

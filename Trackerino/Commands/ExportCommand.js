@@ -1,14 +1,14 @@
-const moment = require('moment')
+const {format} = require('date-fns')
 
 function ExportCommand (_input) {
 	let tasks = this.options.storage.get('tasks', [])
-	let format = 'csv'
+	let fileformat = 'csv'
 
 	if(_input.toLowerCase() === 'json') {
-		format = 'json'
+		fileformat = 'json'
 	}
 
-	if(format === 'csv') {
+	if(fileformat === 'csv') {
 		let csvData = []
 		csvData.push([
 			"DATE",
@@ -21,9 +21,9 @@ function ExportCommand (_input) {
 		])
 
 		tasks.map(task => csvData.push([
-			this.currentTime.format(this.options.dateFormat),
-			moment.unix(task.get('started_at')).format(this.options.timeFormat),
-			moment.unix(task.get('ended_at')).format(this.options.timeFormat),
+			format(this.currentTime, this.options.dateFormat),
+			format(task.get('started_at'), this.options.timeFormat),
+			format(task.get('ended_at'), this.options.timeFormat),
 			task.get('amount').toFixed(2).split('.').join(','),
 			'',
 			task.get('project'),
@@ -37,9 +37,9 @@ function ExportCommand (_input) {
 		let output = []
 
 		tasks.map(task => output.push({
-			date: this.currentTime.format(this.options.dateFormat),
-			started_at: moment.unix(task.started_at).format(this.options.timeFormat),
-			ended_at: moment.unix(task.ended_at).format(this.options.timeFormat),
+			date: format(this.currentTime, this.options.dateFormat),
+			started_at: format(task.started_at, this.options.timeFormat),
+			ended_at: format(task.ended_at, this.options.timeFormat),
 			amount: task.amount,
 			project: task.project,
 			task: task.task

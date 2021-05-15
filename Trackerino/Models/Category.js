@@ -1,5 +1,4 @@
 const axios = require('axios')
-const moment = require('moment')
 const BaseModel = require('./BaseModel')
 
 const slugify = require('../Helpers/slugify')
@@ -55,6 +54,13 @@ class Category extends BaseModel {
 
 	days(_value, _interface) {
 		if(!!_value) {
+			let available_days = ['mo','tu','we','th','fr','sa','su']
+			let days = _value.split(',')
+			days.map(day => {
+				if(day.indexOf('-') > 2) {
+					// day span
+				}
+			})
 			_interface.say(`TODO: interpret ${ _value } to save days_config`)
 			// this.data.days_config = _value
 		}

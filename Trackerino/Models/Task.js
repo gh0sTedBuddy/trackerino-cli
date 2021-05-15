@@ -1,4 +1,3 @@
-const moment = require('moment')
 const ProjectModel = require('./Project')
 const CategoryModel = require('./Category')
 const BaseModel = require('./BaseModel')
@@ -12,7 +11,7 @@ class Task extends BaseModel {
 			task: '',
 			project: null,
 			category: null,
-			started_at: moment().unix(),
+			started_at: Date.now(),
 			ended_at: null,
 			is_idle: false,
 			...(arguments[0] || {})
