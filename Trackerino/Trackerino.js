@@ -107,7 +107,7 @@ class Trackerino {
 		this.options.onAsk(question.join(' ') + ' ', this.getAnswer.bind(this))
 	}
 
-	getAnswer (_input) {
+	async getAnswer (_input) {
 		if(!_input) {
 			this.logError('no description given')
 			return this.ask()
@@ -167,7 +167,7 @@ class Trackerino {
 									}
 									return this.ask()
 								} else if('function' === typeof result[_action]) {
-									let output = result[_action](_value, this)
+									let output = await result[_action](_value, this)
 
 									if(!!output && 'string' === typeof output) {
 										this.say(output)

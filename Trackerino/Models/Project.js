@@ -61,22 +61,36 @@ class Project extends BaseModel {
 	}
 
 	async export (_value, _interface) {
-		const files = _interface.options.storage.getAll()
+		let onlyToday = _value.indexOf('--today') >= 0
+
+		_value = _value.split(' ').filter(_i => _i != '--today').join(' ').trim()
+
 		let tasks = []
-		files.forEach(file => {
-			if(file.tasks && file.tasks.length > 0) {
-				file.tasks.filter(_task => {
-					return _task && _task.project && _task.project == this.get('name')
-				}).forEach(task => tasks.push(task))
+
+		if(onlyToday) {
+			tasks = _interface.options.storage.get('tasks')
+
+			if(tasks.length) {
+				tasks = tasks.filter(_task => _task && _task.get('project') && _task.get('project') == this.get('name'))
 			}
-		})
+		} else {
+			const files = _interface.options.storage.getAll()
+			files.forEach(file => {
+				if(file.tasks && file.tasks.length > 0) {
+					file.tasks.filter(_task => {
+						return _task && _task.project && _task.project == this.get('name')
+					}).forEach(task => tasks.push(task))
+				}
+			})
+		}
 
 		if(!!_value && 'string' === typeof _value) {
 			_value = _value.toLowerCase()
 		}
+
 		switch(_value) {
 			default:
-				_interface.say('unknown format, default: csv')
+				_interface.say(`unknown format: ${_value}; switch to default: csv`)
 			case 'csv':
 				_interface.say(this._exportCSV(tasks, _interface))
 				break
@@ -95,25 +109,34 @@ class Project extends BaseModel {
 
 				for(let _index = 0; _index < tasks.length; _index++) {
 					const task = tasks[_index]
-					if(!task.is_idle) {
-						let project = projects.data.find(entry => entry.project.name.toLowerCase() == task.project.toLowerCase())
-						let service = services.data.find(entry => entry.service.name.toLowerCase() == task.category.toLowerCase())
-						if(project) {
-							project = project.project
-						}
-						if(service) {
-							service = service.service
-						}
-						await axios.post(`${ mite_api_endpoint }/time_entries.json`, {
-							api_key: mite_api_key,
-							time_entry: {
-								date_at: format(task.started_at, _interface.options.dateFormat),
-								minutes: task.amount * 60,
-								note: task.task,
-								project_id: project.id || null,
-								service_id: service.id || null
+					if(!task.get('is_idle')) {
+						try {
+							let project = projects.data.find(entry => entry.project.name.toLowerCase() == task.get('project').toLowerCase())
+							let service = services.data.find(entry => entry.service.name.toLowerCase() == task.get('category').toLowerCase())
+							if(project) {
+								project = project.project
 							}
-						})
+							if(service) {
+								service = service.service
+							}
+
+							let data = {
+								api_key: mite_api_key,
+								time_entry: {
+									date_at: format(task.get('started_at'), _interface.options.dateFormat),
+									minutes: task.get('amount') * 60,
+									note: task.get('task'),
+									project_id: project.id || null,
+									service_id: service.id || null
+								}
+							}
+							let resp = await axios.post(`${ mite_api_endpoint }/time_entries.json`, data)
+							if (resp.data && resp.data.time_entry && resp.data.time_entry.id) {
+								_interface.say(`task ${task.get('id')} sent to mite`)
+							}
+						} catch(err) {
+							console.log(err)
+						}
 					}
 				}
 				break
