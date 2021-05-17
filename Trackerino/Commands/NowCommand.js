@@ -19,8 +19,10 @@ function NowCommand (_input) {
 			let timeLeft =  dailyWorkTime - workTime
 			if(timeLeft > 0) {
 				timeLeft = `${ timeLeft.toFixed(2) } hours left (${ (timeLeft * 60).toFixed(2) } mins)`
+			} else {
+				timeLeft = timeLeft.toFixed(2)
 			}
-			this.say(`Total work today: ${workTime.toFixed(2)}/${dailyWorkTime.toFixed(2)} hours, ${timeLeft.toFixed(2)}`)
+			this.say(`Total work today: ${workTime.toFixed(2)}/${dailyWorkTime.toFixed(2)} hours, ${timeLeft}`)
 		}
 
 		if(lastEntry && lastEntry.get('ended_at')) {
