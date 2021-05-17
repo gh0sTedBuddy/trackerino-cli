@@ -1,3 +1,5 @@
+const {format} = require('date-fns')
+
 function SetTimeCommand (_input, _instance) {
 	let timeRegex = /^(\d{2})\:(\d{2})$/
 	if(timeRegex.test(_input)) {
@@ -5,8 +7,12 @@ function SetTimeCommand (_input, _instance) {
 		hours = parseInt(hours)
 		minutes = parseInt(minutes)
 
-		this.currentTime.hours(hours)
-		this.currentTime.minutes(minutes)
+		let _current = new Date(this.currentTime)
+
+		currentTime.setHours(hours)
+		currentTime.setMinutes(minutes)
+
+		this.currentTime = _current.getTime()
 		this.isRealTime = false
 		this.say(`set current time: ${ format(this.currentTime, this.options.timeFormat) }`)
 	} else {
