@@ -9,8 +9,8 @@ function SetTimeCommand (_input, _instance) {
 
 		let _current = new Date(this.currentTime)
 
-		currentTime.setHours(hours)
-		currentTime.setMinutes(minutes)
+		_current.setHours(hours)
+		_current.setMinutes(minutes)
 
 		this.currentTime = _current.getTime()
 		this.isRealTime = false
