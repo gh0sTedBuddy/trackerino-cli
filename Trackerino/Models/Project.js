@@ -126,8 +126,8 @@ class Project extends BaseModel {
 									date_at: format(task.get('started_at'), _interface.options.dateFormat),
 									minutes: task.get('amount') * 60,
 									note: task.get('task'),
-									project_id: project.id || null,
-									service_id: service.id || null
+									project_id: project ? project.id : null,
+									service_id: service ? service.id : null
 								}
 							}
 							let resp = await axios.post(`${ mite_api_endpoint }/time_entries.json`, data)
