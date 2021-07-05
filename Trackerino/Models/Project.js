@@ -125,7 +125,10 @@ class Project extends BaseModel {
 								time_entry: {
 									date_at: format(task.get('started_at'), _interface.options.dateFormat),
 									minutes: task.get('amount') * 60,
-									note: task.get('task'),
+									note: [
+										`(${format(task.get('started_at'), _interface.options.timeFormat)} bis ${format(task.get('ended_at'), _interface.options.timeFormat)})`,
+										task.get('task')
+									].join(' '),
 									project_id: project ? project.id : null,
 									service_id: service ? service.id : null
 								}

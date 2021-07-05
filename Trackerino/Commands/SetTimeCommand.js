@@ -1,4 +1,4 @@
-const {format} = require('date-fns')
+const { format } = require('date-fns')
 
 function SetTimeCommand (_input, _instance) {
 	let timeRegex = /^(\d{2})\:(\d{2})$/
@@ -11,6 +11,7 @@ function SetTimeCommand (_input, _instance) {
 
 		_current.setHours(hours)
 		_current.setMinutes(minutes)
+		_current.setSeconds(0)
 
 		this.currentTime = _current.getTime()
 		this.isRealTime = false
