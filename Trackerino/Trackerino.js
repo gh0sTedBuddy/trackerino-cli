@@ -7,10 +7,10 @@ const slugify = require('./Helpers/slugify')
 
 class Trackerino {
 	constructor () {
-		let { version, name } = require('../package.json')
-
-		this.name = name
-		this.version = version
+		this.name = "trackerino"
+		this.version = "0.0.1"
+		this.currentTime = null
+		this.ticker = null
 		this.options = {
 			...{
 				i18n: null,
@@ -18,6 +18,8 @@ class Trackerino {
 				date: null,
 				dateFormat: 'yyyy-MM-dd',
 				timeFormat: 'HH:mm',
+				onNotify: () => {},
+				onTick: () => {},
 				onAsk: () => {},
 				onClose: () => {},
 				onOutput: () => {},
@@ -45,6 +47,8 @@ class Trackerino {
 		this.say(this.__(`⏰ Welcome to ${ this.name }`))
 
 		this.ask()
+
+		this.ticker = setInterval(this.onTick.bind(this), 1000)
 	}
 
 	storage () {
@@ -90,6 +94,14 @@ class Trackerino {
 		if(!!this.options.storage) {
 			this.options.storage.load()
 		}
+	}
+
+	notify(options) {
+		this.options.onNotify({
+			title: 'Trackerino',
+			message: 'No Messages (yet?)',
+			...options
+		})
 	}
 
 	say (text) {
@@ -174,7 +186,6 @@ class Trackerino {
 									}
 								} else {
 									let property = result.get(_action)
-									console.log(property)
 									if('undefined' !== typeof property) {
 										result.set(_action, _value)
 									} else {
@@ -213,7 +224,7 @@ class Trackerino {
 		if(tasks.length > 0) {
 			return tasks[tasks.length-1].get('ended_at') || this.options.storage.get('started_at', defaultValue)
 		}
-		return defaultValue
+		return defaultValue || this.options.storage.get('started_at')
 	}
 
 	registerCommand (command) {
@@ -228,11 +239,11 @@ class Trackerino {
 		}
 	}
 
-	save () {
+	async save () {
 		const callback = arguments[0] || null
 
 		if(!!this.options.storage) {
-			this.options.storage.save(callback)
+			await this.options.storage.save(callback)
 		}
 	}
 
@@ -261,16 +272,37 @@ class Trackerino {
 		this.options.storage.set('tasks', tasks)
 
 		if(isIdle) {
-			this.say(`😴 pssst... you're ${ task || 'sleeping (?!)' } for ${ amount } hours (or ${ (amount * 60).toFixed(2) } minutes). 💤`)
+			this.say(`😴 pssst... you're ${ task || 'sleeping (?!)' } for ${ amount } hours (or ${ (amount * 60).toFixed(2) } minutes). 💤`)
 			if(!!process && !!process.stderr) process.stderr.write("\x07")
 		} else {
 			this.say(`✅ awesome! that only took you ${ amount } hours (or ${ (amount * 60).toFixed(2) } minutes). 👍`)
 		}
 	}
 
+	onTick () {
+		if (this.isRealTime) {
+			this.currentTime = new Date()
+		}
+
+		let trackers = this.options.storage.get('trackers', [])
+		if(trackers.length > 0) {
+			for(let index = 0; index < trackers.length; index ++) {
+				let tracker = trackers[index]
+
+				tracker.trigger(this)
+			}
+		}
+
+		this.options.onTick(this)
+	}
+
 	onClose () {
 		this.save(() => {
 			this.say("\n👋 BYE 😊\n")
+			if(this.ticker !== null) {
+				clearInterval(this.ticker)
+				this.ticker = null
+			}
 			process.exit(0)
 		})
 	}

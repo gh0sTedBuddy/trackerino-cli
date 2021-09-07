@@ -1,3 +1,6 @@
+const { addMinutes, addDays } = require('date-fns')
+const Cron = require('cron-converter')
+
 const BaseModel = require('./BaseModel')
 const Task = require('./Task')
 
@@ -6,72 +9,65 @@ class Tracker extends BaseModel {
 	constructor () {
 		super()
 
+		this.cronInstance = new Cron ()
 		this.data = {
 			...this.data,
 			name: '',
-			total_value: 0,	// keep the total value
+			message: '',
+			next_tick_at: null,
+			active: false,
+			pattern: null,
+			total_ticks: 0,
+			type: 'default',
 			items: [],
 			...(arguments[0] || {})
 		}
 
 		this.initMethods()
+	}
 
-		if(!!this.data.items && this.data.items.length > 0) {
-			this.data.items = this.data.items.map(itm => {
-				return new Task(itm)
+	trigger (_interface) {
+		if(this.get('active') && this.get('next_tick_at', null) !== null && (new Date(this.get('next_tick_at'))).getTime() < _interface.currentTime.getTime()) {
+			this.set('total_ticks', this.get('total_ticks') + 1)
+			this.set('next_tick_at', this.calcNextTick(_interface.currentTime || new Date()))
+
+			_interface.notify({
+				title: this.get('name', 'Trackerino::Tracker'),
+				message: this.get('message', 'oi'),
+				sound: true,
+				wait: true
 			})
 		}
 	}
 
-	getData () {
-		return {
-			...this.data,
-			items: this.data.items.map(itm => itm.getData())
-		}
+	set_active (_input, _interface) {
+		this.set('active', true)
+		this.set('next_tick_at', this.calcNextTick())
+
+		_interface.say(`#${ this.get('id') } scheduled to: ${ new Date(this.get('next_tick_at')) }`)
 	}
 
-	add (_entry, _interface) {
-		try {
-			let value = parseFloat(_entry)
-			if(!isNaN(value)) {
-				this.data.value += value
-				_interface.getAnswer(`${ this.data.name }: ${ value }`)
-			} else {
-				throw new Error("not a valid value")
+	set_inactive () {
+		this.set('active', false)
+		this.set('next_tick_at', null)
+	}
+
+	when (q, _interface) {
+		_interface.say(`scheduled at: ${ new Date(this.get('next_tick_at')) }`)
+	}
+
+	calcNextTick (now = new Date()) {
+		if(typeof now === 'object' && now.constructor.name == 'Date') {
+			let pattern = this.get('pattern', null)
+			if (pattern) {
+				return this.cronInstance.fromString(pattern).schedule(now).next().toDate()
 			}
-		} catch(err) {
-			_interface.logError('invalid value')
 		}
-	}
-
-	remove (_entry, _interface) {
-		this.data.items = this.data.items.filter(itm => itm.get('id') != _entry)
-	}
-
-	list (_value, _interface) {
-		return this.show(_value, _interface)
+		return now
 	}
 
 	show (_value, _interface) {
-		let output = []
-
-		output.push(`Value: ${ this.data.total_value }`)
-
-		return output.join("\n")
-
-		for(let _index  = 0; _index < this.data.items.length; _index++) {
-			let itm = this.data.items[_index]
-			if((_value === 'checked' && !itm.get('is_checked')) || (_value === 'unchecked' && itm.get('is_checked'))) continue;
-			output.push([
-				itm.get('is_checked') ? '[✅]' : '[  ]',
-				`- [${ itm.get('id') }] ${ itm.get('title') }`
-			].join("\t"))
-		}
-		output = [
-			`${ this.get('name') } (${ output.length } of ${ this.data.items.length } items)`,
-			...output
-		]
-		return output.join("\n")
+		return this.get('name')
 	}
 }
 
