@@ -22,10 +22,6 @@ class Category extends BaseModel {
 		}
 	}
 
-	select (_value, _interface) {
-		_interface.options.storage.set('project', this.get('project'))
-	}
-
 	company(_value, _interface) {
 		if(!!_value) {
 			this.data.company = _value
@@ -43,12 +39,15 @@ class Category extends BaseModel {
 			if(!!proj && proj.length > 0) {
 				proj = proj.shift()
 			} else {
-				projects.push(new ProjectModel({
+				proj = new ProjectModel({
 					name: _value
-				}))
+				})
+
+				projects.push(proj)
+
 				_interface.options.storage.set('projects', projects)
 			}
-			this.data.project = _value
+			this.data.project = proj.get('name', _value)
 		}
 	}
 
@@ -64,6 +63,10 @@ class Category extends BaseModel {
 			_interface.say(`TODO: interpret ${ _value } to save days_config`)
 			// this.data.days_config = _value
 		}
+	}
+
+	select (_value, _interface) {
+		_interface.getAnswer(`/category ${this.get('name', _value || null)}`)
 	}
 }
 

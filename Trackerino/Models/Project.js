@@ -28,7 +28,7 @@ class Project extends BaseModel {
 	}
 
 	select (_value, _interface) {
-		_interface.options.storage.set('project', this.get('name'))
+		_interface.getAnswer(`/project ${this.get('name', _value || null)}`)
 	}
 
 	_exportCSV (tasks, _interface) {
