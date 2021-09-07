@@ -2,7 +2,7 @@
   "private": true,
   "name": "trackerino",
   "version": "1.0.0",
-  "description": "a small little script which starts a timer timer to enter your done tasks.",
+  "description": "a small little script which starts a timer to enter your done tasks.",
   "scripts": {
     "start": "electron ."
   },
@@ -17,9 +17,11 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "cron-converter": "^1.0.1",
     "cron-parser": "^3.5.0",
     "date-fns": "^2.21.3",
     "i18n": "^0.13.2",
+    "node-notifier": "^10.0.0",
     "shortid": "^2.2.15",
     "yargs": "^15.3.1"
   },

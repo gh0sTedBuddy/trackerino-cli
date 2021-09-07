@@ -10,13 +10,16 @@ const locale = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG
 i18n.setLocale((locale).split('_').shift().toLowerCase())
 const readline = require('readline');
 
-const Storage = require('./Trackerino/Storage')
+const notifier = require('node-notifier');
+
+const Storage = require('./Storage')
 const Trackerino = require('./Trackerino');
 
-const rl = readline.createInterface({
-	input: process.stdin,
-	output: process.stdout
-})
+if(yargs.version || yargs.v) {
+	let { version, name } = require('./package.json')
+	console.log(version)
+	process.exit(0)
+}
 
 let today = null
 if(yargs.today) {
@@ -29,19 +32,30 @@ if(yargs.today) {
 	}
 }
 
-if(yargs.version || yargs.v) {
-	let { version, name } = require('./package.json')
-	console.log(version)
-	process.exit(0)
-}
-
 const $storage = new Storage({
 	date: today
+})
+
+const rl = readline.createInterface({
+	input: process.stdin,
+	output: process.stdout,
+	completer: function () {
+		console.log('TODO: something')
+	}
 })
 
 const trackerino = new Trackerino({
 	storage: $storage,
 	date: today,
+	onTick: function (_interface) {},
+	onNotify: function (options) {
+		notifier.notify({
+			title: options.title || 'Trackerino CLI',
+			message: options.message || 'No Message (yet?)!',
+			sound: options.sound || false,
+			wait: options.wait || false
+		});
+	},
 	onAsk: (q, handle) => rl.question(q, handle),
 	onError: text => console.error('ERR', text),
 	onOutput: (text, cmd) => {
