@@ -1,6 +1,6 @@
 const fs = require('fs')
 const { format } = require('date-fns')
-const Models = require('./Models')
+const Models = require('./Trackerino/Models')
 
 const __homedir = require('os').homedir();
 
@@ -12,7 +12,7 @@ class Storage {
 			...(arguments[0] || {})
 		}
 
-		if(!this.options.date) {
+		if(!this.options.date) {
 			this.options.date = new Date()
 		}
 
@@ -22,7 +22,11 @@ class Storage {
 			fs.mkdirSync(this.options.path);
 		}
 
-		this.data = {
+		this.data = this.getDefaults()
+	}
+
+	getDefaults () {
+		return {
 			data: {
 				started_at: this.options.date.getTime(),
 				project: null,
@@ -95,12 +99,12 @@ class Storage {
 					if(Array.isArray(this.data[key])) {
 						this.data[key] = [
 							...this.data[key],
-							...(JSON.parse(content) || [])
+							...(JSON.parse(content) || [])
 						]
 					} else if('object' === typeof this.data[key]) {
 						this.data[key] = {
 							...this.data[key],
-							...(JSON.parse(content) || [])
+							...(JSON.parse(content) || [])
 						}
 					} else {
 						this.data[key] = JSON.parse(content)
@@ -216,7 +220,7 @@ class Storage {
 	}
 
 	get (key) {
-		let _default = arguments[1] || null
+		let _default = arguments[1] || null
 		if(!!this.data[key]) {
 			return this.data[key]
 		} else if(!this.data[key] && !!this.data.data[key]) {
