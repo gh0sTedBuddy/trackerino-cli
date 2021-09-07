@@ -13,7 +13,6 @@ class Trackerino {
 		this.ticker = null
 		this.options = {
 			...{
-				i18n: null,
 				storage: null,
 				date: null,
 				dateFormat: 'yyyy-MM-dd',
@@ -56,9 +55,6 @@ class Trackerino {
 	}
 
 	__ (key) {
-		if(!!this.options.i18n) {
-			return this.options.i18n.__(key)
-		}
 		return key
 	}
 
