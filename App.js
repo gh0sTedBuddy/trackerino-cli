@@ -2,7 +2,6 @@
 const yargs = require('yargs').argv
 const path = require('path');
 const locale = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG || process.env.LANGUAGE || 'en'
-i18n.setLocale((locale).split('_').shift().toLowerCase())
 const readline = require('readline');
 
 const notifier = require('node-notifier');
