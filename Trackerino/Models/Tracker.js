@@ -1,5 +1,5 @@
 const { addMinutes, addDays } = require('date-fns')
-const Cron = require('cron-converter')
+// const Cron = require('cron-converter')
 
 const BaseModel = require('./BaseModel')
 const Task = require('./Task')
@@ -9,7 +9,7 @@ class Tracker extends BaseModel {
 	constructor () {
 		super()
 
-		this.cronInstance = new Cron ()
+//		this.cronInstance = new Cron ()
 		this.data = {
 			...this.data,
 			name: '',
@@ -60,7 +60,7 @@ class Tracker extends BaseModel {
 		if(typeof now === 'object' && now.constructor.name == 'Date') {
 			let pattern = this.get('pattern', null)
 			if (pattern) {
-				return this.cronInstance.fromString(pattern).schedule(now).next().toDate()
+// 				return this.cronInstance.fromString(pattern).schedule(now).next().toDate()
 			}
 		}
 		return now
