@@ -7,7 +7,7 @@ const readline = require('readline');
 const notifier = require('node-notifier');
 
 const Storage = require('./Storage')
-const Trackerino = require('./Trackerino');
+const Trackerino = require('trackerino-core');
 
 if(yargs.version || yargs.v) {
 	let { version, name } = require('./package.json')

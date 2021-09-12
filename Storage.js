@@ -1,6 +1,6 @@
 const fs = require('fs')
 const { format } = require('date-fns')
-const Models = require('./Trackerino/Models')
+const Models = require('trackerino-core/Models')
 
 const __homedir = require('os').homedir();
 
