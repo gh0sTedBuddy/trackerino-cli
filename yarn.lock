@@ -382,7 +382,7 @@ strip-ansi@^6.0.0:
 
 "trackerino-core@ssh://git@github.com:trackerino/trackerino-core.git":
   version "0.0.1"
-  resolved "ssh://git@github.com:trackerino/trackerino-core.git#39a6b4b1b248a0020c196dfdee41ff69ae898c96"
+  resolved "ssh://git@github.com:trackerino/trackerino-core.git#b90bb95c2f0fd3aa809cfd8243a2c05e46c8932c"
   dependencies:
     axios "^0.21.1"
     cron-converter "^1.0.1"
