@@ -40,7 +40,9 @@ class Storage {
 			categories: [],
 			todos: [],
 			config: {
-				daily_work_time: 8
+				daily_work_time: 8,
+				access_token: null,
+				refresh_token: null
 			}
 		}
 	}
