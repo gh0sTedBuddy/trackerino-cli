@@ -41,6 +41,15 @@ const rl = readline.createInterface({
 const trackerino = new Trackerino({
 	storage: $storage,
 	date: today,
+	onBeforeAnswer: (_input, _interface) => {
+		if(_input == '/quit') {
+			_interface.onClose()
+		}
+	},
+	onClose: () => {
+		console.log("\n👋 BYE 😊\n")
+		process.exit(0)
+	},
 	onTick: function (_interface) {},
 	onNotify: function (options) {
 		notifier.notify({
@@ -50,7 +59,11 @@ const trackerino = new Trackerino({
 			wait: options.wait || false
 		});
 	},
-	onAsk: (q, handle) => rl.question(q, handle),
+	onAsk: (q, handle, _interface) => rl.question(q, async (_input) => {
+		let output = await handle(_input)
+		// console.log(output)
+		_interface.ask()
+	}),
 	onError: text => console.error('ERR', text),
 	onOutput: (text, cmd) => {
 		console.log(text)
