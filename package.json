@@ -1,28 +1,28 @@
 {
-  "private": true,
-  "name": "trackerino",
-  "version": "1.0.0",
-  "description": "a small little script which starts a timer to enter your done tasks.",
-  "scripts": {
-    "start": "electron ."
-  },
-  "preferGlobal": "true",
-  "bin": {
-    "trackerino": "App.js"
-  },
-  "main": "App.js",
-  "license": "MIT",
-  "engines": {
-    "node": "*"
-  },
-  "dependencies": {
-    "axios": "^0.24.0",
-    "cron-parser": "^3.5.0",
-    "date-fns": "^2.21.3",
-    "node-notifier": "^10.0.0",
-    "shortid": "^2.2.15",
-    "trackerino-core": "ssh://git@github.com:bennigames/trackerino-core.git",
-    "yargs": "^15.3.1"
-  },
-  "devDependencies": {}
+	"private": true,
+	"name": "trackerino",
+	"version": "1.0.0",
+	"description": "a small little script which starts a timer to enter your done tasks.",
+	"scripts": {
+		"start": "electron ."
+	},
+	"preferGlobal": true,
+	"bin": {
+		"trackerino": "App.js"
+	},
+	"main": "App.js",
+	"license": "MIT",
+	"engines": {
+		"node": "*"
+	},
+	"dependencies": {
+		"axios": "^0.24.0",
+		"cron-parser": "^3.5.0",
+		"date-fns": "^2.21.3",
+		"node-notifier": "^10.0.0",
+		"shortid": "^2.2.15",
+		"trackerino-core": "ssh://git@github.com:bennigames/trackerino-core.git",
+		"yargs": "^15.3.1"
+	},
+	"devDependencies": {}
 }
